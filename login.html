@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - مدرسة مار مرقس</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #11172a;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.05);
+            border: 0.5px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            direction: rtl;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .login-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(212,175,55,0.35);
+        }
+
+        .cross-wrap {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(212,175,55,0.4);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .login-card:hover .cross-wrap {
+            border-color: rgba(212,175,55,0.9);
+            background: rgba(212,175,55,0.1);
+        }
+        .cross-wrap i {
+            font-size: 24px;
+            color: #d4af37;
+            transition: transform 0.4s;
+        }
+        .login-card:hover .cross-wrap i {
+            transform: scale(1.15) rotate(8deg);
+        }
+
+        .login-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .login-sub {
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 1.75rem;
+        }
+
+        .field-wrap { margin-bottom: 1rem; text-align: right; }
+        .field-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field-label i { font-size: 14px; }
+
+        .field-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 0.5px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            direction: rtl;
+            font-family: sans-serif;
+            transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+        }
+        .field-input::placeholder { color: rgba(255,255,255,0.2); }
+        .field-input:hover {
+            border-color: rgba(212,175,55,0.4);
+            background: rgba(255,255,255,0.09);
+        }
+        .field-input:focus {
+            border-color: rgba(212,175,55,0.75);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 3px rgba(212,175,55,0.12);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 11px;
+            background: #d4af37;
+            color: #11172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-family: sans-serif;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-login:hover {
+            background: #e8c84a;
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-login:active { transform: scale(0.98) translateY(0); }
+
+        .error { color: #f09595; font-size: 13px; display: none; margin-top: 12px; text-align: center; }
+
+        .divider { border: none; border-top: 0.5px solid rgba(255,255,255,0.08); margin: 1.5rem 0 1rem; }
+
+        .footer-note {
+            font-size: 12px;
+            color: rgba(255,255,255,0.25);
+            line-height: 1.6;
+            transition: color 0.3s;
+        }
+        .login-card:hover .footer-note { color: rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="cross-wrap">
+            <i class="ti ti-cross"></i>
+        </div>
+        <p class="login-title">مدرسة مار مرقس</p>
+        <p class="login-sub">دخول أعضاء المدرسة</p>
+
+        <div class="field-wrap">
+            <label class="field-label">
+                <i class="ti ti-user"></i> اسم المستخدم
+            </label>
+            <input class="field-input" type="text" id="username" placeholder="اكتب اسمك هنا" />
+        </div>
+        <div class="field-wrap">
+            <label class="field-label">
+                <i class="ti ti-lock"></i> كلمة المرور
+            </label>
+            <input class="field-input" type="password" id="password" placeholder="••••••••" />
+        </div>
+
+        <button class="btn-login" onclick="checkLogin()">دخول</button>
+        <p class="error" id="errorMsg"></p>
+
+        <hr class="divider" />
+        <p class="footer-note">«الْحَصَادُ كَثِيرٌ وَلٰكِنَّ الْفَعَلَةَ قَلِيلُونَ»</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="auth.js"></script>
+
+    <!-- لا تقم بإعادة التوجيه التلقائي هنا. تسجيل الدخول مطلوب في كل زيارة. -->
+</body>
+</html>
