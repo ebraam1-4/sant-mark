@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم والكنترول - مدرسة مار مرقس</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; min-height: 100vh; background: #11172a; color: #fff; padding: 2rem; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; }
+        .welcome-txt { font-size: 18px; font-weight: bold; }
+        .welcome-txt span { color: #d4af37; }
+        .header-buttons { display: flex; gap: 8px; }
+        .btn-logout, .btn-logout a { text-decoration: none; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; }
+        .btn-home { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2); }
+        .btn-home a { color: #fff; }
+        
+        .control-panel { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
+        .control-panel h2 { color: #d4af37; font-size: 20px; margin-bottom: 1rem; }
+        .control-panel p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.6; }
+        
+        .btn-action { width: 100%; padding: 14px; background: #dc3545; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); transition: 0.2s; margin-bottom: 1rem; }
+        .btn-action:hover { background: #bd2130; }
+        
+        /* 🔓 زرار إعادة الفتح الآمن */
+        .btn-reopen { background: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
+        .btn-reopen:hover { background: #218838; }
+
+        /* 🔵 زرار بدء يوم جديد */
+        .btn-new-day { background: #17a2b8; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3); }
+        .btn-new-day:hover { background: #138496; }
+
+        .alert-msg { padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 1.5rem; display: none; text-align: center; }
+        .alert-msg.success { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 0.5px solid #28a745; }
+        .alert-msg.info { background: rgba(23, 162, 184, 0.2); color: #17a2b8; border: 0.5px solid #17a2b8; }
+        .alert-msg.warning { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 0.5px solid #ffc107; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-box">
+            <div class="welcome-txt">غرفة الكنترول: أ/ <span id="teacherName">..</span></div>
+            <div class="header-buttons">
+                <button class="btn-logout btn-home"><a href="index.html">الرئيسية</a></button>
+                <button class="btn-logout" onclick="logout()">خروج</button>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <h2><i class="ti ti-settings"></i> إدارة نظام الحضور والغياب</h2>
+            <p>تحكم في غلق وفتح النظام بحرية تامة دون خوف من فقدان بيانات التلاميذ الذين سجلوا حضورهم بالفعل.</p>
+
+            <button class="btn-action" onclick="closeAttendanceAndProcess()">
+                <i class="ti ti-lock-square"></i> قفل باب الحضور وتثبيت الغياب اليومي
+            </button>
+
+            <button class="btn-action btn-reopen" onclick="openAttendanceAndReset()">
+                <i class="ti ti-lock-open"></i> إعادة فتح باب الحضور (بدون مسح الحاضرين)
+            </button>
+        </div>
+
+        <div class="control-panel" style="border-color: rgba(23, 162, 184, 0.3);">
+            <h2><i class="ti ti-calendar-plus"></i> بداية اجتماع جديد</h2>
+            <p>⚠️ اضغط على هذا الزرار <b>مرة واحدة فقط في بداية يوم الجمعة (الاجتماع الجديد)</b> لتصفير حالات الطلاب المسبقة وتجهيز الكشاف لاستقبالهم.</p>
+            
+            <button class="btn-action btn-new-day" onclick="startNewMeetingDay()">
+                <i class="ti ti-refresh"></i> تهيئة وتصفير الحالات لبدء يوم جديد
+            </button>
+
+            <div id="alertBox" class="alert-msg"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('role') !== 'teacher') {
+            window.location.href = "login.html";
+        } else {
+            document.getElementById('teacherName').textContent = sessionStorage.getItem('teacherName');
+        }
+
+        // 1️⃣ قفل الحضور الآمن: يحسب غياب للغايبين فقط، ويسيب الحاضرين "حاضر" زي ما هم
+        function closeAttendanceAndProcess() {
+            if (!confirm("هل أنت متأكد من قفل الحضور؟ سيتم احتساب غياب إضافي فقط لمن لم يحضر اليوم.")) return;
+            
+            const alertBox = document.getElementById('alertBox');
+            
+            database.ref('system_status').set({
+                attendance_open: false
+            }).then(() => {
+                
+                database.ref('groups').once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        let updates = {};
+                        
+                        snapshot.forEach((groupSnapshot) => {
+                            const groupName = groupSnapshot.key;
+                            
+                            if (groupName !== "هيئة التدريس") {
+                                groupSnapshot.forEach((studentSnapshot) => {
+                                    const studentName = studentSnapshot.key;
+                                    const studentData = studentSnapshot.val();
+                                    
+                                    if (studentData.grades === "❌ الحساب معطل (مفصول)" || studentData.status === "مفصول") {
+                                        return;
+                                    }
+
+                                    // الطالب اللي محضيرش خالص (حالتة مش حاضر) هو بس اللي هيتغيب
+                                    if (studentData.status !== "حاضر") {
+                                        let currentAbsences = parseInt(studentData.absence) || 0;
+                                        let newAbsences = currentAbsences + 1;
+
+                                        updates[`/groups/${groupName}/${studentName}/absence`] = newAbsences;
+                                        updates[`/groups/${groupName}/${studentName}/status`] = "غائب";
+
+                                        if (newAbsences >= 6) {
+                                            updates[`/groups/${groupName}/${studentName}/status`] = "مفصول";
+                                            updates[`/groups/${groupName}/${studentName}/grades`] = "❌ الحساب معطل (مفصول)";
+                                        }
+                                    }
+                                    // تذكير هام: الطالب اللي حالته "حاضر" مش هنيجي جنبه وهيفضل حاضر!
+                                });
+                            }
+                        });
+
+                        database.ref().update(updates).then(() => {
+                            alertBox.className = "alert-msg success";
+                            alertBox.textContent = "🔒 تم قفل الحضور بنجاح! الحاضرون ثابتون، وتم تسجيل غياب للمتأخرين.";
+                            alertBox.style.display = "block";
+                        });
+                    }
+                });
+            });
+        }
+
+        // 2️⃣ إعادة فتح الحضور الذكي: بيشيل الغياب من على اللي اتغيبوا بس، والحاضر يفضل حاضر وثابت!
+        function openAttendanceAndReset() {
+            if (!confirm("هل تريد إعادة فتح باب الحضور؟ سيتم خصم الغياب المحتسب منذ قليل عن الغائبين مع الحفاظ على الحاضرين.")) return;
+            
+            const alertBox = document.getElementById('alertBox');
+            
+            database.ref('system_status').set({
+                attendance_open: true
+            }).then(() => {
+                
+                database.ref('groups').once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        let updates = {};
+                        
+                        snapshot.forEach((groupSnapshot) => {
+                            const groupName = groupSnapshot.key;
+                            
+                            if (groupName !== "هيئة التدريس") {
+                                groupSnapshot.forEach((studentSnapshot) => {
+                                    const studentName = studentSnapshot.key;
+                                    const studentData = studentSnapshot.val();
+                                    
+                                    // بنصلح داتا اللي نزلهم غائب بس، ونرجع حالتهم فاضية عشان السكانر يقبلهم
+                                    if (studentData.status === "غائب") {
+                                        let currentAbsences = parseInt(studentData.absence) || 0;
+                                        let originalAbsences = currentAbsences - 1;
+                                        if (originalAbsences < 0) originalAbsences = 0;
+
+                                        updates[`/groups/${groupName}/${studentName}/absence`] = originalAbsences;
+                                        updates[`/groups/${groupName}/${studentName}/status`] = ""; 
+
+                                        if (studentData.grades === "❌ الحساب معطل (مفصول)") {
+                                            updates[`/groups/${groupName}/${studentName}/grades`] = 0; 
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                        database.ref().update(updates).then(() => {
+                            alertBox.className = "alert-msg info";
+                            alertBox.textContent = "🔓 تم إعادة فتح باب الحضور! الحاضرون لم يتأثروا، وباقي الطلاب يمكنهم التسجيل الآن.";
+                            alertBox.style.display = "block";
+                        });
+                    }
+                });
+            });
+        }
+
+        // 3️⃣ زرار بداية اليوم الجديد: ده بندوس عليه الجمعة الجاية الصبح عشان يصفر الحالات ويخلي الكل جاهز للتحضير
+        function startNewMeetingDay() {
+            if (!confirm("⚠️ تحذير: هل أنت متأكد من بدء يوم اجتماع جديد؟ هذا سيعيد حالة جميع الطلاب النشطين إلى (مستعد للتحضير) تمهيداً للاجتماع القادم.")) return;
+            
+            const alertBox = document.getElementById('alertBox');
+            
+            database.ref('system_status').set({
+                attendance_open: true
+            }).then(() => {
+                database.ref('groups').once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        let updates = {};
+                        
+                        snapshot.forEach((groupSnapshot) => {
+                            const groupName = groupSnapshot.key;
+                            
+                            if (groupName !== "هيئة التدريس") {
+                                groupSnapshot.forEach((studentSnapshot) => {
+                                    const studentName = studentSnapshot.key;
+                                    const studentData = studentSnapshot.val();
+                                    
+                                    // بنصفر حالة الكل (سواء كان حاضر أو غايب) عشان يبدأوا على نضافه، ما عدا المفصولين طبعاً
+                                    if (studentData.status !== "مفصول" && studentData.grades !== "❌ الحساب معطل (مفصول)") {
+                                        updates[`/groups/${groupName}/${studentName}/status`] = ""; 
+                                    }
+                                });
+                            }
+                        });
+
+                        database.ref().update(updates).then(() => {
+                            alertBox.className = "alert-msg warning";
+                            alertBox.textContent = "🔄 تم تهيئة السيستم بالكامل بنجاح واستقبال يوم جديد! جميع الحالات جاهزة الآن للتحضير.";
+                            alertBox.style.display = "block";
+                        });
+                    }
+                });
+            });
+        }
+
+        function logout() { sessionStorage.clear(); window.location.href = "login.html"; }
+    </script>
+</body>
+</html>

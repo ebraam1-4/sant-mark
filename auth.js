@@ -6,44 +6,68 @@ const firebaseConfig = {
   storageBucket: "school-989d1.firebasestorage.app",
   messagingSenderId: "217947078105",
   appId: "1:217947078105:web:5abaec6b22344523fd2dc8",
-  measurementId: "G-R0TSR9VR3L"
+  measurementId: "G-R0TSR9VR3L",
 };
-// تشغيل Firebase في الموقع
+
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 function checkLogin() {
-    const userInp = document.getElementById('username').value.trim().toLowerCase();
-    const passInp = document.getElementById('password').value;
-    const errorTxt = document.getElementById('errorMsg');
+  const groupInp = document.getElementById("groupSelect").value.trim();
+  const userInp  = document.getElementById("username").value.trim();
+  const passInp  = document.getElementById("password").value;
+  const errorTxt = document.getElementById("errorMsg");
 
-    if (userInp === "" || passInp === "") {
-        errorTxt.textContent = "برجاء كتابة الاسم والباسورد!";
-        errorTxt.style.display = "block";
-        return;
+  errorTxt.style.display = "none";
+
+  if (userInp === "") {
+    errorTxt.textContent = "برجاء كتابة الإسم!";
+    errorTxt.style.display = "block";
+    return;
+  }
+
+  /* ─── خادم ─── */
+  if (groupInp === "teachers") {
+    if (passInp === "") {
+      errorTxt.textContent = "برجاء كتابة الباسورد الخاص بالمعلم!";
+      errorTxt.style.display = "block";
+      return;
     }
-
-    // بندخل الداتا بيز ندور جوه الـ users على الاسم المكتوب
-    database.ref('users/' + userInp).once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-            const correctPassword = snapshot.val(); // الباصورد الصح اللي متخزن عندك
-            
-            if (passInp == correctPassword) {
-                // لو صح، بنعلم في ذاكرة الجلسة إنه تمام ومسموح له بالدخول
-                // استخدم sessionStorage عشان مايتذكرش الدخول بين جلسات المتصفح
-                sessionStorage.setItem('isLoggedIn', 'true');
-                
-                // بنقله لصفحة المدرسة الرئيسية (تأكد إن اسمها index.html عندك)
-                window.location.href = "index.html"; 
-            } else {
-                errorTxt.textContent = "الباصورد غير صحيح!";
-                errorTxt.style.display = "block";
-            }
+    database.ref("teachers/" + userInp).once("value").then((snapshot) => {
+      if (snapshot.exists()) {
+        const teacherData = snapshot.val();
+        if (String(passInp) === String(teacherData.password)) {
+          sessionStorage.setItem("isLoggedIn", "true");
+          sessionStorage.setItem("role", "teacher");
+          sessionStorage.setItem("teacherName", userInp);
+          window.location.href = "index.html";
         } else {
-            errorTxt.textContent = "هذا الحساب غير مسجل في نظام المدرسة!";
-            errorTxt.style.display = "block";
+          errorTxt.textContent = "الباصورد غير صحيح!";
+          errorTxt.style.display = "block";
         }
-    }).catch((error) => {
-        console.error("خطأ في الاتصال بالداتا بيز:", error);
-    });
+      } else {
+        errorTxt.textContent = "هذا الاسم غير مسجل في هيئة التدريس!";
+        errorTxt.style.display = "block";
+      }
+    }).catch((err) => console.error("خطأ في جلب بيانات المعلم:", err));
+
+  /* ─── تلميذ ─── */
+  } else {
+    database.ref("groups/" + groupInp + "/" + userInp).once("value").then((snapshot) => {
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("role", "student");
+        sessionStorage.setItem("studentName", userInp);
+        sessionStorage.setItem("studentGroup", groupInp);
+        sessionStorage.setItem("studentGrades",     userData.grades     !== undefined ? userData.grades     : "");
+        sessionStorage.setItem("studentAttendance", userData.attendance !== undefined ? userData.attendance : 0);
+        sessionStorage.setItem("studentAbsence",    userData.absence    !== undefined ? userData.absence    : 0);
+        window.location.href = "index.html";
+      } else {
+        errorTxt.textContent = "هذا الاسم غير موجود في هذه المجموعة!";
+        errorTxt.style.display = "block";
+      }
+    }).catch((err) => console.error("خطأ في جلب بيانات الطالب:", err));
+  }
 }

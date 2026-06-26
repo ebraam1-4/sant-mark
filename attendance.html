@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الحضور الذكية - مدرسة مار مرقس</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <script>
+        // الصفحة دي مخصصة للتلاميذ فقط، الزائر والخادم يتم تحويلهما للرئيسية
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = "login.html";
+        } else if (sessionStorage.getItem('role') !== 'student') {
+            window.location.href = "index.html";
+        }
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: sans-serif; 
+            min-height: 100vh; 
+            background: #11172a; 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1.5rem; 
+        }
+        
+        .card { 
+            background: rgba(255,255,255,0.05); 
+            border: 0.5px solid rgba(255,255,255,0.12); 
+            border-radius: 16px; 
+            padding: 2.5rem; 
+            width: 100%; 
+            max-width: 450px; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+        
+        .icon-box {
+            width: 70px;
+            height: 70px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            color: #d4af37;
+            font-size: 32px;
+        }
+
+        h1 { font-size: 24px; color: #fff; margin-bottom: 8px; }
+        p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 2rem; }
+        
+        /* كارت بيانات الطالب المكتشفة تلقائياً */
+        .student-profile {
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: right;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-row {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        .profile-row:last-child { margin-bottom: 0; }
+        .profile-label { color: rgba(255,255,255,0.4); font-size: 13px; }
+        .profile-value { color: #d4af37; font-weight: bold; margin-right: 5px; }
+
+        .btn-checkin { 
+            width: 100%; 
+            padding: 14px; 
+            background: #d4af37; 
+            color: #11172a; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            transition: 0.2s;
+        }
+        .btn-checkin:hover { 
+            background: #e8c84a; 
+            box-shadow: 0 0 0 4px rgba(212,175,55,0.15);
+        }
+        .btn-checkin:disabled {
+            background: #334155;
+            color: rgba(255,255,255,0.3);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .alert-msg { padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 1.5rem; display: none; text-align: center; }
+        .alert-msg.success { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 0.5px solid #28a745; }
+        .alert-msg.error { background: rgba(220, 53, 69, 0.2); color: #f09595; border: 0.5px solid #dc3545; }
+        
+        .nav-link { display: inline-block; margin-top: 1.5rem; color: #d4af37; text-decoration: none; font-size: 13px; }
+        .nav-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="icon-box">
+            <i class="ti ti-device-mobile-rotated"></i>
+        </div>
+        <h1>تأكيد الحضور الرقمي</h1>
+        <p>مرحباً بك في مدرسة ماري مرقس</p>
+
+        <div class="student-profile" id="profileBox">
+            <div class="profile-row">
+                <span class="profile-label"><i class="ti ti-user"></i> اسم التلميذ:</span>
+                <span class="profile-value" id="lblStudentName">جاري التعرف..</span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label"><i class="ti ti-users"></i> المجموعة:</span>
+                <span class="profile-value" id="lblStudentGroup">جاري التعرف..</span>
+            </div>
+        </div>
+
+        <button class="btn-checkin" id="btnAction" onclick="confirmMyAttendance()">
+            <i class="ti ti-discount-check"></i> اضغط لتأكيد حضورك الآن
+        </button>
+
+        <div id="alertBox" class="alert-msg"></div>
+        
+        <a href="index.html" class="nav-link">العودة للرئيسية</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        // 1. نقرأ بيانات الطالب من ذاكرة الموبايل (المتصفح)
+        const loggedInName = sessionStorage.getItem('studentName'); // الاسم اللي دخل بيه في صفحة الـ Login
+        const loggedInGroup = sessionStorage.getItem('studentGroup'); // مجموعته
+
+        const lblName = document.getElementById('lblStudentName');
+        const lblGroup = document.getElementById('lblStudentGroup');
+        const btnAction = document.getElementById('btnAction');
+        const alertBox = document.getElementById('alertBox');
+
+        // 2. التحقق: لو مش عامل تسجيل دخول أصلاً، نمنعه ونقوله اذهب لصفحة الدخول
+        if (!loggedInName || !loggedInGroup) {
+            lblName.textContent = "غير معروف";
+            lblGroup.textContent = "غير معروف";
+            btnAction.disabled = true;
+            
+            alertBox.className = "alert-msg error";
+            alertBox.textContent = "⚠️ أنت غير مسجل دخول على هذا الهاتف! برجاء تسجيل الدخول أولاً في الموقع ليتم التعرف عليك.";
+            alertBox.style.display = "block";
+        } else {
+            // لو مسجل دخول، نظهر اسمه ومجموعته فوراً وقفل الخانات
+            lblName.textContent = loggedInName;
+            lblGroup.textContent = loggedInGroup;
+        }
+
+        // 3. دالة الحضور الآمنة عند الضغط على الزرار
+        function confirmMyAttendance() {
+            // أمان إضافي: نتشيك على الفايربيس هل بوابة الحضور مفتوحة ولا قفلت الساعة 12؟
+            database.ref('system_status/attendance_open').once('value').then((statusSnapshot) => {
+                const isOpen = statusSnapshot.val();
+                
+                if (isOpen === false) {
+                    alertBox.className = "alert-msg error";
+                    alertBox.textContent = "⏰ عذراً يا بطل! تم إغلاق باب الحضور لليوم (عبرت الساعة 12 ظهراً).";
+                    alertBox.style.display = "block";
+                    btnAction.disabled = true;
+                    return;
+                }
+
+                // لو مفتوحة، نروح على الفايربيس نحضّر الطالب ده بالذات
+                const studentRef = database.ref('groups/' + loggedInGroup + '/' + loggedInName);
+                
+                studentRef.once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const studentData = snapshot.val();
+                        
+                        // لو الواد ده مفصول أصلاً، السيستم يرفض يحضره
+                        if (studentData.grades === "❌ الحساب معطل (مفصول)" || studentData.status === "مفصول") {
+                            alertBox.className = "alert-msg error";
+                            alertBox.textContent = "❌ هذا الحساب معطل حالياً بسبب تجاوز نسب الغياب!";
+                            alertBox.style.display = "block";
+                            btnAction.disabled = true;
+                            return;
+                        }
+
+                        // لو سجل حضوره فعلاً اليوم، منعرفش نديله نقطة حضور تانية
+                        if (studentData.status === "حاضر") {
+                            alertBox.className = "alert-msg success";
+                            alertBox.textContent = `✅ حضورك مسجل فعلاً اليوم يا ${loggedInName}!`;
+                            alertBox.style.display = "block";
+                            btnAction.disabled = true;
+                            return;
+                        }
+
+                        // عداد الحضور: نزود رقم أيام الحضور بواحد
+                        const currentAttendance = parseInt(studentData.attendance) || 0;
+
+                        // تغيير حالته لـ "حاضر" بنجاح وتسجيل يوم حضور جديد
+                        studentRef.update({
+                            status: "حاضر",
+                            attendance: currentAttendance + 1
+                        }).then(() => {
+                            alertBox.className = "alert-msg success";
+                            alertBox.textContent = `🎉 تم تسجيل حضورك بنجاح يا ${loggedInName}! يومك سعيد.`;
+                            alertBox.style.display = "block";
+                            btnAction.disabled = true; // نقفل الزرار عشان ميتكش عليه مرتين
+                        });
+                    } else {
+                        alertBox.className = "alert-msg error";
+                        alertBox.textContent = "❌ لم يتم العثور على اسمك في قاعدة البيانات، راجع المدرس المسؤول.";
+                        alertBox.style.display = "block";
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

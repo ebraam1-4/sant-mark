@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بياناتي ودرجاتي - مدرسة مار مرقس</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
+
+    <script>
+      if (
+        sessionStorage.getItem("isLoggedIn") !== "true" ||
+        sessionStorage.getItem("role") !== "student"
+      ) {
+        window.location.href = "login.html";
+      }
+    </script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: sans-serif;
+        background: #11172a;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #container {
+        width: 100%;
+        max-width: 1200px;
+        padding: 2rem;
+      }
+
+      .card-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 3rem;
+        perspective: 1000px;
+      }
+
+      /* الكارت الأسطوري للتلميذ */
+      .student-digital-card {
+        background: linear-gradient(
+          135deg,
+          rgba(30, 41, 59, 0.9) 0%,
+          rgba(15, 23, 42, 0.95) 100%
+        );
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 450px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 0.3s,
+          border-color 0.3s;
+      }
+      .student-digital-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(212, 175, 55, 0.7);
+      }
+
+      /* تأثير مائي خلفي كشعار للمدرسة */
+      .student-digital-card::before {
+        content: "\ef31";
+        font-family: "tabler-icons";
+        position: absolute;
+        bottom: -30px;
+        left: -30px;
+        font-size: 180px;
+        color: rgba(212, 175, 55, 0.03);
+        pointer-events: none;
+      }
+
+      .card-header-emblem {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 2px solid #d4af37;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+        font-size: 32px;
+      }
+
+      .display-name {
+        font-size: 26px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 6px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .display-group {
+        font-size: 14px;
+        color: #d4af37;
+        background: rgba(212, 175, 55, 0.1);
+        padding: 4px 14px;
+        border-radius: 50px;
+        display: inline-block;
+        margin-bottom: 2rem;
+        border: 0.5px solid rgba(212, 175, 55, 0.2);
+      }
+
+      /* قسم عرض البيانات الرقمية */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+      }
+      .stats-grid.has-absence {
+        grid-template-columns: 1fr 1fr;
+      }
+      .stats-grid.has-absence .stat-box:last-child {
+        grid-column: 1 / -1;
+      }
+
+      .stat-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 0.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        transition: background 0.2s;
+      }
+      .stat-box:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .stat-label i {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .stat-value.grades {
+        color: #e8c84a;
+      } /* لون ذهبي للدرجات */
+      .stat-value.attendance {
+        color: #34d399;
+      } /* لون أخضر هادئ للحضور */
+      .stat-value.absence {
+        color: #f87171;
+      } /* لون أحمر هادئ للغياب */
+
+      .expelled-banner {
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #f87171;
+        border-radius: 10px;
+        padding: 0.9rem;
+        font-size: 14px;
+        margin-top: 1.5rem;
+        display: none;
+        text-align: center;
+      }
+
+      .btn-back-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 2.5rem;
+        padding: 10px 24px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 0.5px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s;
+      }
+      .btn-back-home:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #d4af37;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <header>
+        <div class="logo right-logo">
+          <img src="img/preview.png" alt="شعار مدرسة مارمرقس" />
+        </div>
+        <div class="header-titles">
+          <h1>مدرسة مار مرقس لتلمذة وإعداد الخدام</h1>
+          <p class="subtitle">
+            «الْحَصَادُ كَثِيرٌ وَلٰكِنَّ الْفَعَلَةَ قَلِيلُونَ»
+          </p>
+        </div>
+        <div class="logo2 left-logo">
+          <img src="img/logo2.png" alt="شعار الكنيسة" />
+        </div>
+      </header>
+
+      <nav class="main-nav">
+        <ul class="nav-tabs">
+          <li class="nav-tab"><a href="index.html">🏠 الرئيسية</a></li>
+          <li class="nav-tab"><a href="class.html">📖 محاضرات</a></li>
+          <li class="nav-tab"><a href="coptic.html">⛪ قبطي</a></li>
+          <li class="nav-tab"><a href="al7an.html">🎵 ألحان</a></li>
+          <li class="nav-tab"><a href="mars.html">🎨 ممارسات</a></li>
+          <li class="nav-tab"><a href="sleep.html">😴 صلاة المساء</a></li>
+          <li class="nav-tab active">
+            <a href="card.html">📊 درجاتي وغيابي</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="card-wrapper">
+        <div class="student-digital-card">
+          <div class="card-header-emblem">
+            <i class="ti ti-school"></i>
+          </div>
+
+          <div class="display-name" id="studentNameDisplay">
+            جاري التحميل...
+          </div>
+          <div class="display-group" id="studentGroupDisplay">
+            مجموعة التلميذ
+          </div>
+
+          <div class="stats-grid has-absence" id="statsGrid">
+            <div class="stat-box">
+              <div class="stat-label">
+                <i class="ti ti-trophy"></i> إجمالي الدرجات
+              </div>
+              <div class="stat-value grades" id="studentGradesDisplay">0</div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-label">
+                <i class="ti ti-calendar-check"></i> أيام الحضور
+              </div>
+              <div class="stat-value attendance" id="studentAttendanceDisplay">
+                0
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <div class="stat-label">
+                <i class="ti ti-calendar-x"></i> أيام الغياب
+              </div>
+              <div class="stat-value absence" id="studentAbsenceDisplay">
+                0
+              </div>
+            </div>
+          </div>
+
+          <div class="expelled-banner" id="expelledBanner">
+            ❌ هذا الحساب معطل حالياً بسبب تجاوز نسب الغياب (مفصول)
+          </div>
+
+          <a href="index.html" class="btn-back-home"
+            ><i class="ti ti-arrow-right"></i> العودة للصفحة الرئيسية</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // قراءة البيانات المحفوظة للتلميذ فور تسجيل دخوله بنجاح من الـ SessionStorage
+        const name = sessionStorage.getItem("studentName");
+        const group = sessionStorage.getItem("studentGroup");
+        const grades = sessionStorage.getItem("studentGrades");
+        const attendance = sessionStorage.getItem("studentAttendance");
+        const absence = sessionStorage.getItem("studentAbsence");
+
+        const EXPELLED_TEXT = "❌ الحساب معطل (مفصول)";
+
+        // حقن البيانات في الكارت بالملّي لعرضها لايف للتلميذ
+        if (name)
+          document.getElementById("studentNameDisplay").textContent = name;
+        if (group)
+          document.getElementById("studentGroupDisplay").textContent =
+            `مجموعة ${group}`;
+
+        // التأكد من عرض 0 في حال لو كانت الخانات لسه مفيهاش قيم في الفايربيس
+        document.getElementById("studentAttendanceDisplay").textContent =
+          attendance !== null && attendance !== undefined ? attendance : 0;
+        document.getElementById("studentAbsenceDisplay").textContent =
+          absence !== null && absence !== undefined ? absence : 0;
+
+        // لو الحساب مفصول، نظهر تنبيه واضح ونستبدل خانة الدرجات بصفر بدل النص
+        if (grades === EXPELLED_TEXT) {
+          document.getElementById("studentGradesDisplay").textContent = "0";
+          document.getElementById("expelledBanner").style.display = "block";
+        } else {
+          document.getElementById("studentGradesDisplay").textContent =
+            grades !== null && grades !== undefined && grades !== "" ? grades : 0;
+        }
+      });
+    </script>
+  </body>
+</html>

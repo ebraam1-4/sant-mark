@@ -2,6 +2,14 @@
    ✨ مدرسة مار مرقس — التأثيرات والأنيميشن
    ════════════════════════════════════════════════════ */
 
+/* ── حماية الصفحات: يتشغل فوراً قبل أي حاجة ── */
+(function guardPage() {
+  if (window.location.pathname.endsWith("login.html")) return;
+  if (sessionStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+})();
+
 /* ── Scroll Reveal: عناصر تظهر عند التمرير ── */
 function initScrollReveal() {
   const targets = document.querySelectorAll(
@@ -13,9 +21,7 @@ function initScrollReveal() {
     (entries) => {
       entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.classList.add("visible");
-          }, i * 80);
+          setTimeout(() => entry.target.classList.add("visible"), i * 80);
           observer.unobserve(entry.target);
         }
       });
@@ -28,36 +34,24 @@ function initScrollReveal() {
 
 /* ── Ripple Effect على الأزرار ── */
 function initRipple() {
+  if (!document.querySelector("#ripple-style")) {
+    const style = document.createElement("style");
+    style.id = "ripple-style";
+    style.textContent = `@keyframes rippleAnim { to { transform: scale(1); opacity: 0; } }`;
+    document.head.appendChild(style);
+  }
+
   document.querySelectorAll(".year-btn").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       const rect = this.getBoundingClientRect();
       const ripple = document.createElement("span");
       const size = Math.max(rect.width, rect.height) * 2;
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
-
       ripple.style.cssText = `
-        position: absolute;
-        width: ${size}px; height: ${size}px;
-        left: ${x}px; top: ${y}px;
-        background: rgba(255,255,255,0.25);
-        border-radius: 50%;
-        transform: scale(0);
-        animation: rippleAnim 0.6s ease-out forwards;
-        pointer-events: none;
+        position:absolute; width:${size}px; height:${size}px;
+        left:${e.clientX - rect.left - size / 2}px; top:${e.clientY - rect.top - size / 2}px;
+        background:rgba(255,255,255,0.25); border-radius:50%;
+        transform:scale(0); animation:rippleAnim 0.6s ease-out forwards; pointer-events:none;
       `;
-
-      if (!document.querySelector("#ripple-style")) {
-        const style = document.createElement("style");
-        style.id = "ripple-style";
-        style.textContent = `
-          @keyframes rippleAnim {
-            to { transform: scale(1); opacity: 0; }
-          }
-        `;
-        document.head.appendChild(style);
-      }
-
       this.style.position = "relative";
       this.style.overflow = "hidden";
       this.appendChild(ripple);
@@ -66,25 +60,20 @@ function initRipple() {
   });
 }
 
-/* ── Tilt Effect على الكروت (Desktop فقط) ── */
+/* ── Tilt على الكروت (ديسكتوب فقط) ── */
 function initTilt() {
   if (window.innerWidth < 768) return;
-
   document.querySelectorAll(".subject-card, .info-card").forEach((card) => {
     card.addEventListener("mousemove", function (e) {
       const rect = this.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const tiltX = (-y * 8).toFixed(2);
-      const tiltY = (x * 8).toFixed(2);
-      this.style.transform = `translateY(-8px) perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.01)`;
+      this.style.transform = `translateY(-8px) perspective(600px) rotateX(${(-y * 8).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg) scale(1.01)`;
     });
-
     card.addEventListener("mouseleave", function () {
       this.style.transform = "";
-      this.style.transition = "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)";
+      this.style.transition = "transform 0.5s cubic-bezier(0.22,1,0.36,1)";
     });
-
     card.addEventListener("mouseenter", function () {
       this.style.transition = "transform 0.1s ease";
     });
@@ -95,90 +84,70 @@ function initTilt() {
 function initTypingSubtitle() {
   const subtitle = document.querySelector(".subtitle");
   if (!subtitle) return;
-
   const text = subtitle.textContent.trim();
   subtitle.textContent = "";
-  subtitle.style.opacity = "1";
-  subtitle.style.borderRight = "2px solid rgba(212,175,55,0.7)";
-  subtitle.style.whiteSpace = "nowrap";
-  subtitle.style.overflow = "hidden";
-  subtitle.style.display = "inline-block";
-
+  subtitle.style.cssText +=
+    "opacity:1; border-right:2px solid rgba(212,175,55,0.7); white-space:nowrap; overflow:hidden; display:inline-block;";
   let i = 0;
-  const delay = 1200; // ابدأ بعد ظهور الهيدر
-
   setTimeout(() => {
     const interval = setInterval(() => {
-      subtitle.textContent += text[i];
-      i++;
+      subtitle.textContent += text[i++];
       if (i >= text.length) {
         clearInterval(interval);
-        // إزالة cursor بعد الانتهاء
         setTimeout(() => {
           subtitle.style.borderRight = "none";
         }, 1500);
       }
     }, 60);
-  }, delay);
+  }, 1200);
 }
 
-/* ── Gold Particle عند الـ Hover على Nav ── */
+/* ── Gold Sparkles على الـ Nav ── */
 function initNavSparkles() {
+  if (!document.querySelector("#spark-style")) {
+    const style = document.createElement("style");
+    style.id = "spark-style";
+    style.textContent = `@keyframes sparkFly { 0%{transform:scale(1) translate(0,0);opacity:1} 100%{transform:scale(0) translate(15px,-20px);opacity:0} }`;
+    document.head.appendChild(style);
+  }
   document.querySelectorAll(".nav-tab a").forEach((link) => {
     link.addEventListener("mouseenter", function (e) {
       for (let i = 0; i < 4; i++) {
         const spark = document.createElement("span");
-        const rect = this.getBoundingClientRect();
         spark.style.cssText = `
-          position: fixed;
-          width: 4px; height: 4px;
-          background: #d4af37;
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 9999;
-          left: ${e.clientX + (Math.random() - 0.5) * 30}px;
-          top:  ${e.clientY + (Math.random() - 0.5) * 20}px;
-          animation: sparkFly 0.7s ease-out forwards;
+          position:fixed; width:4px; height:4px; background:#d4af37; border-radius:50%;
+          pointer-events:none; z-index:9999;
+          left:${e.clientX + (Math.random() - 0.5) * 30}px;
+          top:${e.clientY + (Math.random() - 0.5) * 20}px;
+          animation:sparkFly 0.7s ease-out forwards;
         `;
         document.body.appendChild(spark);
         setTimeout(() => spark.remove(), 700);
       }
     });
   });
-
-  if (!document.querySelector("#spark-style")) {
-    const style = document.createElement("style");
-    style.id = "spark-style";
-    style.textContent = `
-      @keyframes sparkFly {
-        0%   { transform: scale(1) translate(0, 0);   opacity: 1; }
-        100% { transform: scale(0) translate(${Math.random() > 0.5 ? "+" : "-"}${Math.round(Math.random() * 20 + 10)}px, -${Math.round(Math.random() * 25 + 10)}px); opacity: 0; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 }
 
-/* ── تبديل الوضع الداكن / الفاتح */
+/* ── تبديل الوضع الداكن / الفاتح ── */
 function initThemeSwitcher() {
   const switcher = document.querySelector("#theme-switcher");
-  const body = document.body;
   if (!switcher) return;
-
   const label = switcher.querySelector(".theme-switcher-label");
   const icon = switcher.querySelector(".theme-switcher-icon");
+  const body = document.body;
 
-  const currentTheme = localStorage.getItem("mm-theme");
-  const lightMode = currentTheme === "light";
-  body.classList.toggle("light-theme", lightMode);
+  body.classList.toggle(
+    "light-theme",
+    localStorage.getItem("mm-theme") === "light",
+  );
 
   function updateSwitcher() {
     const isLight = body.classList.contains("light-theme");
     label.textContent = isLight ? "الوضع الفاتح" : "الوضع الداكن";
     icon.textContent = isLight ? "☀️" : "🌙";
     switcher.style.background = isLight
-      ? "rgba(15, 23, 30, 0.1)"
-      : "rgba(255, 255, 255, 0.08)";
+      ? "rgba(15,23,30,0.1)"
+      : "rgba(255,255,255,0.08)";
   }
 
   switcher.addEventListener("click", () => {
@@ -187,25 +156,62 @@ function initThemeSwitcher() {
     localStorage.setItem("mm-theme", activeLight ? "light" : "dark");
     updateSwitcher();
   });
-
   updateSwitcher();
 }
 
-/* ── Counter Animation للأرقام ── */
-function animateCounters() {
-  document.querySelectorAll("[data-count]").forEach((el) => {
-    const target = parseInt(el.dataset.count);
-    let count = 0;
-    const step = Math.ceil(target / 40);
-    const timer = setInterval(() => {
-      count = Math.min(count + step, target);
-      el.textContent = count;
-      if (count >= target) clearInterval(timer);
-    }, 40);
-  });
+/* ── إضافة تبويب الـ Nav حسب الدور ── */
+function createNavTab(id, href, title) {
+  const existing = document.getElementById(id);
+  if (existing) {
+    const link = existing.querySelector("a");
+    if (link) {
+      link.href = href;
+      link.textContent = title;
+    }
+    return existing;
+  }
+  const navTabs = document.querySelector(".nav-tabs");
+  if (!navTabs) return null;
+  const item = document.createElement("li");
+  item.className = "nav-tab";
+  item.id = id;
+  const link = document.createElement("a");
+  link.href = href;
+  link.textContent = title;
+  item.appendChild(link);
+  navTabs.appendChild(item);
+  return item;
 }
 
-/* ── تشغيل كل التأثيرات عند جهوزية الصفحة ── */
+function updateRoleNavItem() {
+  const role = sessionStorage.getItem("role");
+  const teacherTab = document.getElementById("teacherTab");
+  const teacherControlTab = document.getElementById("teacherControlTab");
+  const studentTab = document.getElementById("studentTab");
+
+  if (role === "teacher") {
+    if (studentTab) studentTab.style.display = "none";
+    const tab = createNavTab("teacherTab", "scanner.html", "📸 تسجيل الطلاب");
+    if (tab) tab.style.display = "";
+    const controlTab = createNavTab(
+      "teacherControlTab",
+      "teacher.html",
+      "🔒 قفل الحضور",
+    );
+    if (controlTab) controlTab.style.display = "";
+  } else if (role === "student") {
+    if (teacherTab) teacherTab.style.display = "none";
+    if (teacherControlTab) teacherControlTab.style.display = "none";
+    const tab = createNavTab("studentTab", "card.html", "📊 درجاتي وغيابي");
+    if (tab) tab.style.display = "";
+  } else {
+    if (teacherTab) teacherTab.style.display = "none";
+    if (teacherControlTab) teacherControlTab.style.display = "none";
+    if (studentTab) studentTab.style.display = "none";
+  }
+}
+
+/* ── تشغيل كل الحاجات عند تحميل الصفحة ── */
 document.addEventListener("DOMContentLoaded", () => {
   initScrollReveal();
   initRipple();
@@ -213,14 +219,21 @@ document.addEventListener("DOMContentLoaded", () => {
   initTypingSubtitle();
   initNavSparkles();
   initThemeSwitcher();
+  updateRoleNavItem();
 });
+// 1. تحديد كل عناصر الصوت أو أزرار التشغيل في الصفحة
+// (قم بتغيير الكلاس '.audio-element' للكلاس الخاص بعناصر الصوت عندك)
+const allAudios = document.querySelectorAll(".audio-element");
 
-/* ── حماية الصفحات: لو مش مسجل دخول، ارجع على login ── */
-(function guardPage() {
-  // login.html مش محتاجة حماية
-  if (window.location.pathname.endsWith('login.html')) return;
-
-  if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-    window.location.href = 'login.html';
-  }
-})();
+allAudios.forEach((currentAudio) => {
+  // الاستماع لحدث بدء التشغيل (play) على كل عنصر صوت
+  currentAudio.addEventListener("play", () => {
+    // الميزة المطلوبة: المرور على باقي الأصوات وإيقافها
+    allAudios.forEach((otherAudio) => {
+      if (otherAudio !== currentAudio) {
+        otherAudio.pause(); // إيقاف الصوت الآخر
+        otherAudio.currentTime = 0; // (اختياري) إرجاع الصوت القديم من البداية
+      }
+    });
+  });
+});

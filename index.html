@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -13,7 +13,7 @@
           <img src="img/preview.png" alt="شعار مدرسة مارمرقس" />
         </div>
         <div class="header-titles">
-          <h1> مار مرقس لتلمذة وإعداد الخدام</h1>
+          <h1>مدرسة مار مرقس لتلمذة وإعداد الخدام</h1>
           <p class="subtitle">
             «الْحَصَادُ كَثِيرٌ وَلٰكِنَّ الْفَعَلَةَ قَلِيلُونَ»
           </p>
@@ -31,6 +31,18 @@
           <li class="nav-tab"><a href="al7an.html">🎵 ألحان</a></li>
           <li class="nav-tab"><a href="mars.html">🎨 ممارسات</a></li>
           <li class="nav-tab"><a href="sleep.html">😴 صلاة المساء</a></li>
+
+          <li class="nav-tab" id="teacherTab" style="display: none">
+            <a href="scanner.html">📸 تسجيل الطلاب</a>
+          </li>
+
+          <li class="nav-tab" id="teacherControlTab" style="display: none">
+            <a href="teacher.html">🔒 قفل الحضور</a>
+          </li>
+
+          <li class="nav-tab" id="studentTab" style="display: none">
+            <a href="card.html">📊 درجاتي وغيابي</a>
+          </li>
         </ul>
       </nav>
 
@@ -160,6 +172,45 @@
       </div>
     </div>
 
+    <script>
+      // 1. جدار الحماية الصارم: لو مش مسجل دخول خالص اطرده فوراً للوجن
+      if (sessionStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "login.html";
+      }
+
+      // 2. التحكم في الأزرار بناءً على الصلاحية بمجرد تحميل عناصر الصفحة
+      document.addEventListener("DOMContentLoaded", function () {
+        const userRole = sessionStorage.getItem("role");
+
+        const teacherTab = document.getElementById("teacherTab");
+        const teacherControlTab = document.getElementById("teacherControlTab");
+        const studentTab = document.getElementById("studentTab");
+
+        // إخفاء التبويبات في البداية تماماً لمنع فلاش اللغبطة
+        if (teacherTab) teacherTab.style.display = "none";
+        if (teacherControlTab) teacherControlTab.style.display = "none";
+        if (studentTab) studentTab.style.display = "none";
+
+        // ─── [ حالة: الخادم ] ───
+        if (userRole === "teacher") {
+          if (teacherTab) teacherTab.style.display = "block"; // اظهر تسجيل الطلاب
+          if (teacherControlTab) teacherControlTab.style.display = "block"; // اظهر قفل الحضور
+        }
+        // ─── [ حالة: التلميذ ] ───
+        else if (userRole === "student") {
+          if (studentTab) studentTab.style.display = "block"; // اظهر درجاتي وغيابي فقط وبثبات تام
+        }
+        // ─── [ حالة: الزائر ] ───
+        else if (userRole === "guest") {
+          // الزائر يشوف فقط التابات العامة (التابات الخاصة بالخدام/التلاميذ مخفية بالفعل)
+        }
+        // حماية إضافية لو الـ role تالف أو ممسوح
+        else {
+          sessionStorage.clear();
+          window.location.href = "login.html";
+        }
+      });
+    </script>
     <script src="mine.js"></script>
   </body>
 </html>

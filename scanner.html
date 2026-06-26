@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكشاف السحري - مدرسة مار مرقس</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    
+    <script>
+        if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('role') !== 'teacher') {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: sans-serif; 
+            min-height: 100vh; 
+            background: #11172a; 
+            color: #fff; 
+            padding: 2rem; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        .scanner-container { max-width: 500px; width: 100%; text-align: center; }
+        h1 { color: #d4af37; font-size: 24px; margin-bottom: 5px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 1.5rem; }
+        
+        /* شاشة الكاميرا النظيفة من غير زراير الفتح والقفل الزيادة */
+        #reader { 
+            width: 100%; 
+            background: #1e293b; 
+            border: 2px dashed rgba(212,175,55,0.4); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        /* تعديلات لتجميل صندوق المكتبة الافتراضي */
+        #reader__video { border-radius: 14px; }
+        #reader img { display: none !important; } /* إخفاء أيقونة الرفع اليدوية */
+        #reader button {
+            padding: 10px 20px;
+            background: #d4af37;
+            color: #11172a;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        /* كارت الترحيب المنبثق بالطفل */
+        .welcome-card { 
+            background: rgba(255,255,255,0.05); 
+            border: 0.5px solid rgba(255,255,255,0.15); 
+            border-radius: 16px; 
+            padding: 2rem; 
+            display: none; 
+            margin-top: 1rem; 
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+        }
+        .student-name { font-size: 32px; color: #d4af37; font-weight: bold; margin-bottom: 8px; }
+        .student-group { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
+        .student-streak { font-size: 15px; color: #34d399; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+        @keyframes popUp {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.06);
+            border: 0.5px solid rgba(255,255,255,0.15);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+        .btn-back:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #d4af37;
+        }
+        .error-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px dashed #ef4444;
+            border-radius: 12px;
+            padding: 15px;
+            color: #f87171;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="scanner-container">
+    <h1><i class="ti ti-qrcode"></i> الكشاف السحري للتحضير</h1>
+    <p>وجه كاميرا الموبايل نحو رمز الـ QR الموجود على كارنيه التلميذ</p>
+
+    <div id="reader"></div>
+
+    <div class="welcome-card" id="welcomeCard">
+        <div class="student-name" id="cardName">أبونا فلان</div>
+        <div class="student-group" id="cardGroup">مجموعة تلاميذ</div>
+        <div class="student-streak"><i class="ti ti-sparkles"></i> تم تسجيل الحضور بنجاح!</div>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <a href="index.html" class="btn-back"><i class="ti ti-arrow-right"></i> العودة للرئيسية</a>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="auth.js"></script>
+
+<script>
+    let html5QrcodeScanner;
+    let isProcessing = false; // لمنع تكرار التحضير المتتالي لنفس الكارنيه
+
+    function onScanSuccess(decodedText, decodedResult) {
+        if (isProcessing) return; 
+
+        const errorBox = document.getElementById('errorBox');
+        const welcomeCard = document.getElementById('welcomeCard');
+        
+        // إخفاء الصناديق السابقة مع كل قراءة جديدة
+        errorBox.style.display = "none";
+        welcomeCard.style.display = "none";
+
+        // تفكيك النص: اسم المجموعة|اسم التلميذ
+        const dataParts = decodedText.split('|');
+        
+        if (dataParts.length < 2) {
+            showError("⚠️ رمز QR غير صالح لمدرسة مارمرقس!");
+            return;
+        }
+
+        isProcessing = true;
+        const studentGroup = dataParts[0].trim();
+        const studentName = dataParts[1].trim();
+
+        // التحديث في الفايربيس بناءً على الهيكلة الجديدة
+        const studentRef = database.ref('groups/' + studentGroup + '/' + studentName);
+        studentRef.once('value').then((snapshot) => {
+            if (snapshot.exists()) {
+                const studentData = snapshot.val();
+
+                // لو الطالب مفصول، نرفض تسجيل حضوره
+                if (studentData.grades === "❌ الحساب معطل (مفصول)" || studentData.status === "مفصول") {
+                    showError(`❌ هذا الطالب "${studentName}" مفصول حالياً بسبب تجاوز نسب الغياب!`);
+                    setTimeout(() => { isProcessing = false; }, 3000);
+                    return;
+                }
+
+                // عداد الحضور: نزود رقم أيام الحضور بواحد كل مرة يسجل فيها حضوره لأول مرة في اليوم
+                if (studentData.status === "حاضر") {
+                    // الطالب سجل حضوره فعلاً اليوم، نعرض له الترحيب بس من غير ما نكرر العداد
+                    document.getElementById('cardName').textContent = studentName;
+                    document.getElementById('cardGroup').textContent = `مجموعة ${studentGroup}`;
+                    welcomeCard.style.display = "block";
+                    setTimeout(() => {
+                        welcomeCard.style.display = "none";
+                        isProcessing = false;
+                    }, 3000);
+                    return;
+                }
+
+                const currentAttendance = parseInt(studentData.attendance) || 0;
+
+                studentRef.update({
+                    status: "حاضر",
+                    attendance: currentAttendance + 1
+                }).then(() => {
+                    // إظهار كارت الترحيب ببيانات الطفل
+                    document.getElementById('cardName').textContent = studentName;
+                    document.getElementById('cardGroup').textContent = `مجموعة ${studentGroup}`;
+                    welcomeCard.style.display = "block";
+                    
+                    // 🗣️ نطق اسم التلميذ
+                    speakStudentName(studentName);
+
+                    // إخفاء الكارت وتجهيز الكشاف للقراءة التالية بعد 3 ثوانٍ
+                    setTimeout(() => {
+                        welcomeCard.style.display = "none";
+                        isProcessing = false;
+                    }, 3000);
+                });
+            } else {
+                showError(`❌ الاسم "${studentName}" غير موجود في مجموعة "${studentGroup}"!`);
+                setTimeout(() => { isProcessing = false; }, 3000);
+            }
+        }).catch((err) => {
+            console.error(err);
+            showError("🚨 خطأ أثناء الاتصال بقاعدة البيانات!");
+            setTimeout(() => { isProcessing = false; }, 3000);
+        });
+    }
+
+    function showError(text) {
+        const box = document.getElementById('errorBox');
+        box.textContent = text;
+        box.style.display = "block";
+    }
+
+    // دالة النطق الصوتي لاسم الطالب بالعربي
+    function speakStudentName(name) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(name);
+            utterance.lang = 'ar-EG'; 
+            utterance.rate = 0.9;     
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    // تشغيل الكاميرا تلقائياً
+    function startScanner() {
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            rememberLastUsedCamera: true
+        });
+        html5QrcodeScanner.render(onScanSuccess);
+    }
+
+    window.onload = startScanner;
+</script>
+
+</body>
+</html>
