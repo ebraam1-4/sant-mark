@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والكنترول - مدرسة مار مرقس</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- مكتبة قراءة ملفات الإكسيل -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: sans-serif; min-height: 100vh; background: #11172a; color: #fff; padding: 2rem; }
@@ -16,22 +18,15 @@
         .btn-logout, .btn-logout a { text-decoration: none; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; }
         .btn-home { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2); }
         .btn-home a { color: #fff; }
-        
         .control-panel { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
         .control-panel h2 { color: #d4af37; font-size: 20px; margin-bottom: 1rem; }
         .control-panel p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.6; }
-        
         .btn-action { width: 100%; padding: 14px; background: #dc3545; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); transition: 0.2s; margin-bottom: 1rem; }
         .btn-action:hover { background: #bd2130; }
-        
-        /* 🔓 زرار إعادة الفتح الآمن */
         .btn-reopen { background: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
         .btn-reopen:hover { background: #218838; }
-
-        /* 🔵 زرار بدء يوم جديد */
         .btn-new-day { background: #17a2b8; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3); }
         .btn-new-day:hover { background: #138496; }
-
         .alert-msg { padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 1.5rem; display: none; text-align: center; }
         .alert-msg.success { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 0.5px solid #28a745; }
         .alert-msg.info { background: rgba(23, 162, 184, 0.2); color: #17a2b8; border: 0.5px solid #17a2b8; }
@@ -49,27 +44,26 @@
             </div>
         </div>
 
-        <div class="control-panel">
-            <h2><i class="ti ti-settings"></i> إدارة نظام الحضور والغياب</h2>
-            <p>تحكم في غلق وفتح النظام بحرية تامة دون خوف من فقدان بيانات التلاميذ الذين سجلوا حضورهم بالفعل.</p>
-
-            <button class="btn-action" onclick="closeAttendanceAndProcess()">
-                <i class="ti ti-lock-square"></i> قفل باب الحضور وتثبيت الغياب اليومي
+        <!-- 🟢 قسم رفع ملف الإكسيل للسكانر الخارجي -->
+        <div class="control-panel" style="border-color: #28a745;">
+            <h2><i class="ti ti-file-spreadsheet"></i> رفع تقرير السكانر الخارجي (Excel)</h2>
+            <p>اختر ملف إكسيل الحضور اليومي المستخرج من جهاز السكانر لتحديث غياب وحضور الطلاب تلقائياً بالاسم والمجموعة.</p>
+            
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+            <button class="btn-action btn-reopen" onclick="document.getElementById('excelFile').click()">
+                <i class="ti ti-upload"></i> رفع ملف Excel وتحديث السيستم فوراً
             </button>
-
-            <button class="btn-action btn-reopen" onclick="openAttendanceAndReset()">
-                <i class="ti ti-lock-open"></i> إعادة فتح باب الحضور (بدون مسح الحاضرين)
-            </button>
+            <div id="uploadAlert" class="alert-msg"></div>
         </div>
 
+        <!-- 🔵 قسم تصفير وبدء أسبوع جديد -->
         <div class="control-panel" style="border-color: rgba(23, 162, 184, 0.3);">
             <h2><i class="ti ti-calendar-plus"></i> بداية اجتماع جديد</h2>
-            <p>⚠️ اضغط على هذا الزرار <b>مرة واحدة فقط في بداية يوم الجمعة (الاجتماع الجديد)</b> لتصفير حالات الطلاب المسبقة وتجهيز الكشاف لاستقبالهم.</p>
+            <p>⚠️ اضغط هنا <b>مرة واحدة فقط صباح يوم الخدمة الجديد الأسبوع القادم</b> لتصفير حالات حضور الطلاب المسبقة.</p>
             
             <button class="btn-action btn-new-day" onclick="startNewMeetingDay()">
                 <i class="ti ti-refresh"></i> تهيئة وتصفير الحالات لبدء يوم جديد
             </button>
-
             <div id="alertBox" class="alert-msg"></div>
         </div>
     </div>
@@ -85,145 +79,100 @@
             document.getElementById('teacherName').textContent = sessionStorage.getItem('teacherName');
         }
 
-        // 1️⃣ قفل الحضور الآمن: يحسب غياب للغايبين فقط، ويسيب الحاضرين "حاضر" زي ما هم
-        function closeAttendanceAndProcess() {
-            if (!confirm("هل أنت متأكد من قفل الحضور؟ سيتم احتساب غياب إضافي فقط لمن لم يحضر اليوم.")) return;
-            
-            const alertBox = document.getElementById('alertBox');
-            
-            database.ref('system_status').set({
-                attendance_open: false
-            }).then(() => {
-                
+        // دالة قراءة الإكسيل الذكية والمقارنة بالاسم والمجموعة
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const alertBox = document.getElementById('uploadAlert');
+            alertBox.className = "alert-msg info";
+            alertBox.textContent = "⏳ جاري معالجة ملف الإكسيل وتحديث الفايربيس...";
+            alertBox.style.display = "block";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const excelRows = XLSX.utils.sheet_to_json(worksheet);
+
                 database.ref('groups').once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        let updates = {};
+                    if (!snapshot.exists()) return;
+
+                    let updates = {};
+                    
+                    snapshot.forEach((groupSnapshot) => {
+                        const groupName = groupSnapshot.key;
                         
-                        snapshot.forEach((groupSnapshot) => {
-                            const groupName = groupSnapshot.key;
-                            
-                            if (groupName !== "هيئة التدريس") {
-                                groupSnapshot.forEach((studentSnapshot) => {
-                                    const studentName = studentSnapshot.key;
-                                    const studentData = studentSnapshot.val();
-                                    
-                                    if (studentData.grades === "❌ الحساب معطل (مفصول)" || studentData.status === "مفصول") {
-                                        return;
+                        if (groupName !== "هيئة التدريس") {
+                            groupSnapshot.forEach((studentSnapshot) => {
+                                const studentName = studentSnapshot.key;
+                                const studentData = studentSnapshot.val();
+
+                                if (studentData.status === "مفصول") return;
+
+                                // مقارنة ذكية بالاسم والمجموعة معاً لمنع التشابه
+                                const isPresent = excelRows.some(row => 
+                                    String(row['الاسم']).trim() === studentName.trim() && 
+                                    String(row['المجموعة']).trim() === groupName.trim()
+                                );
+
+                                if (isPresent) {
+                                    updates[`/groups/${groupName}/${studentName}/status`] = "حاضر";
+                                    let currentPresence = parseInt(studentData.presence) || 0;
+                                    updates[`/groups/${groupName}/${studentName}/presence`] = currentPresence + 1;
+                                } else {
+                                    let currentAbsences = parseInt(studentData.absence) || 0;
+                                    let newAbsences = currentAbsences + 1;
+                                    updates[`/groups/${groupName}/${studentName}/absence`] = newAbsences;
+                                    updates[`/groups/${groupName}/${studentName}/status`] = "غائب";
+
+                                    if (newAbsences >= 6) {
+                                        updates[`/groups/${groupName}/${studentName}/status`] = "مفصول";
+                                        updates[`/groups/${groupName}/${studentName}/grades/total`] = 0;
                                     }
+                                }
+                            });
+                        }
+                    });
 
-                                    // الطالب اللي محضيرش خالص (حالتة مش حاضر) هو بس اللي هيتغيب
-                                    if (studentData.status !== "حاضر") {
-                                        let currentAbsences = parseInt(studentData.absence) || 0;
-                                        let newAbsences = currentAbsences + 1;
-
-                                        updates[`/groups/${groupName}/${studentName}/absence`] = newAbsences;
-                                        updates[`/groups/${groupName}/${studentName}/status`] = "غائب";
-
-                                        if (newAbsences >= 6) {
-                                            updates[`/groups/${groupName}/${studentName}/status`] = "مفصول";
-                                            updates[`/groups/${groupName}/${studentName}/grades`] = "❌ الحساب معطل (مفصول)";
-                                        }
-                                    }
-                                    // تذكير هام: الطالب اللي حالته "حاضر" مش هنيجي جنبه وهيفضل حاضر!
-                                });
-                            }
-                        });
-
-                        database.ref().update(updates).then(() => {
-                            alertBox.className = "alert-msg success";
-                            alertBox.textContent = "🔒 تم قفل الحضور بنجاح! الحاضرون ثابتون، وتم تسجيل غياب للمتأخرين.";
-                            alertBox.style.display = "block";
-                        });
-                    }
+                    database.ref().update(updates).then(() => {
+                        alertBox.className = "alert-msg success";
+                        alertBox.textContent = "📊 تم بنجاح! تحديث غياب وحضور جميع الطلاب بناءً على تقرير السكانر.";
+                        event.target.value = ''; 
+                    });
                 });
-            });
+            };
+            reader.readAsArrayBuffer(file);
         }
 
-        // 2️⃣ إعادة فتح الحضور الذكي: بيشيل الغياب من على اللي اتغيبوا بس، والحاضر يفضل حاضر وثابت!
-        function openAttendanceAndReset() {
-            if (!confirm("هل تريد إعادة فتح باب الحضور؟ سيتم خصم الغياب المحتسب منذ قليل عن الغائبين مع الحفاظ على الحاضرين.")) return;
-            
-            const alertBox = document.getElementById('alertBox');
-            
-            database.ref('system_status').set({
-                attendance_open: true
-            }).then(() => {
-                
-                database.ref('groups').once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        let updates = {};
-                        
-                        snapshot.forEach((groupSnapshot) => {
-                            const groupName = groupSnapshot.key;
-                            
-                            if (groupName !== "هيئة التدريس") {
-                                groupSnapshot.forEach((studentSnapshot) => {
-                                    const studentName = studentSnapshot.key;
-                                    const studentData = studentSnapshot.val();
-                                    
-                                    // بنصلح داتا اللي نزلهم غائب بس، ونرجع حالتهم فاضية عشان السكانر يقبلهم
-                                    if (studentData.status === "غائب") {
-                                        let currentAbsences = parseInt(studentData.absence) || 0;
-                                        let originalAbsences = currentAbsences - 1;
-                                        if (originalAbsences < 0) originalAbsences = 0;
-
-                                        updates[`/groups/${groupName}/${studentName}/absence`] = originalAbsences;
-                                        updates[`/groups/${groupName}/${studentName}/status`] = ""; 
-
-                                        if (studentData.grades === "❌ الحساب معطل (مفصول)") {
-                                            updates[`/groups/${groupName}/${studentName}/grades`] = 0; 
-                                        }
-                                    }
-                                });
-                            }
-                        });
-
-                        database.ref().update(updates).then(() => {
-                            alertBox.className = "alert-msg info";
-                            alertBox.textContent = "🔓 تم إعادة فتح باب الحضور! الحاضرون لم يتأثروا، وباقي الطلاب يمكنهم التسجيل الآن.";
-                            alertBox.style.display = "block";
-                        });
-                    }
-                });
-            });
-        }
-
-        // 3️⃣ زرار بداية اليوم الجديد: ده بندوس عليه الجمعة الجاية الصبح عشان يصفر الحالات ويخلي الكل جاهز للتحضير
+        // دالة تصفير الحالات للأسبوع الجديد
         function startNewMeetingDay() {
-            if (!confirm("⚠️ تحذير: هل أنت متأكد من بدء يوم اجتماع جديد؟ هذا سيعيد حالة جميع الطلاب النشطين إلى (مستعد للتحضير) تمهيداً للاجتماع القادم.")) return;
-            
+            if (!confirm("⚠️ هل أنت متأكد من بدء أسبوع جديد؟ هذا سيصفر حالات الحضور اليومية للكل.")) return;
             const alertBox = document.getElementById('alertBox');
             
-            database.ref('system_status').set({
-                attendance_open: true
-            }).then(() => {
-                database.ref('groups').once('value').then((snapshot) => {
-                    if (snapshot.exists()) {
-                        let updates = {};
-                        
-                        snapshot.forEach((groupSnapshot) => {
-                            const groupName = groupSnapshot.key;
-                            
-                            if (groupName !== "هيئة التدريس") {
-                                groupSnapshot.forEach((studentSnapshot) => {
-                                    const studentName = studentSnapshot.key;
-                                    const studentData = studentSnapshot.val();
-                                    
-                                    // بنصفر حالة الكل (سواء كان حاضر أو غايب) عشان يبدأوا على نضافه، ما عدا المفصولين طبعاً
-                                    if (studentData.status !== "مفصول" && studentData.grades !== "❌ الحساب معطل (مفصول)") {
-                                        updates[`/groups/${groupName}/${studentName}/status`] = ""; 
-                                    }
-                                });
-                            }
-                        });
-
-                        database.ref().update(updates).then(() => {
-                            alertBox.className = "alert-msg warning";
-                            alertBox.textContent = "🔄 تم تهيئة السيستم بالكامل بنجاح واستقبال يوم جديد! جميع الحالات جاهزة الآن للتحضير.";
-                            alertBox.style.display = "block";
-                        });
-                    }
-                });
+            database.ref('groups').once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    let updates = {};
+                    snapshot.forEach((groupSnapshot) => {
+                        const groupName = groupSnapshot.key;
+                        if (groupName !== "هيئة التدريس") {
+                            groupSnapshot.forEach((studentSnapshot) => {
+                                const studentName = studentSnapshot.key;
+                                const studentData = studentSnapshot.val();
+                                if (studentData.status !== "مفصول") {
+                                    updates[`/groups/${groupName}/${studentName}/status`] = ""; 
+                                }
+                            });
+                        }
+                    });
+                    database.ref().update(updates).then(() => {
+                        alertBox.className = "alert-msg warning";
+                        alertBox.textContent = "🔄 تم تصفير وتهيئة السيستم بنجاح لاستقبال يوم جديد!";
+                        alertBox.style.display = "block";
+                    });
+                }
             });
         }
 
