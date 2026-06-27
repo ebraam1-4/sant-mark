@@ -106,6 +106,7 @@
         color: #fff;
         margin-bottom: 6px;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        text-align: center;
       }
 
       .display-group {
@@ -114,30 +115,65 @@
         background: rgba(212, 175, 55, 0.1);
         padding: 4px 14px;
         border-radius: 50px;
-        display: inline-block;
-        margin-bottom: 2rem;
+        display: block;
+        margin: 0 auto 2rem;
         border: 0.5px solid rgba(212, 175, 55, 0.2);
+        width: fit-content;
+        text-align: center;
       }
 
-      /* قسم عرض البيانات الرقمية */
+      /* كارت عرض تفاصيل الدرجات */
+      .grades-detailed-panel {
+        background: rgba(255, 255, 255, 0.02);
+        border: 0.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+      }
+
+      .grade-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+        font-size: 14px;
+      }
+      .grade-row span:first-child {
+        color: rgba(255, 255, 255, 0.7);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .grade-row span:last-child {
+        font-weight: bold;
+        color: #fff;
+      }
+
+      .grade-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        background: rgba(214, 175, 55, 0.12);
+        font-size: 15px;
+        font-weight: bold;
+        color: #d4af37;
+      }
+
+      /* قسم عرض البيانات الرقمية للحضور والغياب */
       .stats-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
+        gap: 1rem;
         margin-top: 1rem;
-      }
-      .stats-grid.has-absence {
-        grid-template-columns: 1fr 1fr;
-      }
-      .stats-grid.has-absence .stat-box:last-child {
-        grid-column: 1 / -1;
       }
 
       .stat-box {
         background: rgba(255, 255, 255, 0.03);
         border: 0.5px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 1rem;
         text-align: center;
         transition: background 0.2s;
       }
@@ -148,25 +184,18 @@
       .stat-label {
         font-size: 12px;
         color: rgba(255, 255, 255, 0.4);
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
       }
-      .stat-label i {
-        font-size: 15px;
-        color: rgba(255, 255, 255, 0.5);
-      }
 
       .stat-value {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: bold;
         color: #fff;
       }
-      .stat-value.grades {
-        color: #e8c84a;
-      } /* لون ذهبي للدرجات */
       .stat-value.attendance {
         color: #34d399;
       } /* لون أخضر هادئ للحضور */
@@ -189,9 +218,11 @@
       .btn-back-home {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
-        margin-top: 2.5rem;
-        padding: 10px 24px;
+        margin-top: 2rem;
+        width: 100%;
+        padding: 12px 24px;
         background: rgba(255, 255, 255, 0.05);
         border: 0.5px solid rgba(255, 255, 255, 0.12);
         color: rgba(255, 255, 255, 0.7);
@@ -251,30 +282,48 @@
             مجموعة التلميذ
           </div>
 
-          <div class="stats-grid has-absence" id="statsGrid">
-            <div class="stat-box">
-              <div class="stat-label">
-                <i class="ti ti-trophy"></i> إجمالي الدرجات
-              </div>
-              <div class="stat-value grades" id="studentGradesDisplay">0</div>
+          <!-- 🏆 الجدول المطور الجديد لعرض تفاصيل الدرجات بالتفصيل -->
+          <div class="grades-detailed-panel">
+            <div class="grade-row">
+              <span><i class="ti ti-book"></i> شيت (كتاب مقدس)</span>
+              <span id="bibleGradeDisplay">0</span>
             </div>
+            <div class="grade-row">
+              <span><i class="ti ti-music"></i> ألحان</span>
+              <span id="al7anGradeDisplay">0</span>
+            </div>
+            <div class="grade-row">
+              <span><i class="ti ti-hourglass"></i> ممارسات روحية</span>
+              <span id="practicesGradeDisplay">0</span>
+            </div>
+            <div class="grade-row">
+              <span><i class="ti ti-building-church"></i> لغة قبطية</span>
+              <span id="copticGradeDisplay">0</span>
+            </div>
+            <div class="grade-row">
+              <span><i class="ti ti-presentation"></i> محاضرات</span>
+              <span id="lecturesGradeDisplay">0</span>
+            </div>
+            <div class="grade-total-row">
+              <span><i class="ti ti-trophy"></i> المجموع الإجمالي</span>
+              <span id="studentGradesDisplay">0</span>
+            </div>
+          </div>
 
+          <!-- 📊 قسم العدادات الرقمية لأيام الحضور والغياب -->
+          <div class="stats-grid">
             <div class="stat-box">
               <div class="stat-label">
                 <i class="ti ti-calendar-check"></i> أيام الحضور
               </div>
-              <div class="stat-value attendance" id="studentAttendanceDisplay">
-                0
-              </div>
+              <div class="stat-value attendance" id="studentAttendanceDisplay">0</div>
             </div>
 
             <div class="stat-box">
               <div class="stat-label">
                 <i class="ti ti-calendar-x"></i> أيام الغياب
               </div>
-              <div class="stat-value absence" id="studentAbsenceDisplay">
-                0
-              </div>
+              <div class="stat-value absence" id="studentAbsenceDisplay">0</div>
             </div>
           </div>
 
@@ -298,24 +347,42 @@
         const attendance = sessionStorage.getItem("studentAttendance");
         const absence = sessionStorage.getItem("studentAbsence");
 
+        // قراءة الدرجات التفصيلية الجديدة من الـ SessionStorage (التي يقوم كود الـ Login بحفظها)
+        const bibleGrade = sessionStorage.getItem("studentBibleGrade");
+        const al7anGrade = sessionStorage.getItem("studentAl7anGrade");
+        const practicesGrade = sessionStorage.getItem("studentPracticesGrade");
+        const copticGrade = sessionStorage.getItem("studentCopticGrade");
+        const lecturesGrade = sessionStorage.getItem("studentLecturesGrade");
+
         const EXPELLED_TEXT = "❌ الحساب معطل (مفصول)";
 
-        // حقن البيانات في الكارت بالملّي لعرضها لايف للتلميذ
+        // حقن البيانات الأساسية في الكارت
         if (name)
           document.getElementById("studentNameDisplay").textContent = name;
         if (group)
-          document.getElementById("studentGroupDisplay").textContent =
-            `مجموعة ${group}`;
+          document.getElementById("studentGroupDisplay").textContent = `مجموعة ${group}`;
 
-        // التأكد من عرض 0 في حال لو كانت الخانات لسه مفيهاش قيم في الفايربيس
+        // حقن أيام الحضور والغياب 
         document.getElementById("studentAttendanceDisplay").textContent =
           attendance !== null && attendance !== undefined ? attendance : 0;
         document.getElementById("studentAbsenceDisplay").textContent =
           absence !== null && absence !== undefined ? absence : 0;
 
-        // لو الحساب مفصول، نظهر تنبيه واضح ونستبدل خانة الدرجات بصفر بدل النص
+        // حقن الدرجات التفصيلية المضافة حديثاً
+        document.getElementById("bibleGradeDisplay").textContent = bibleGrade || 0;
+        document.getElementById("al7anGradeDisplay").textContent = al7anGrade || 0;
+        document.getElementById("practicesGradeDisplay").textContent = practicesGrade || 0;
+        document.getElementById("copticGradeDisplay").textContent = copticGrade || 0;
+        document.getElementById("lecturesGradeDisplay").textContent = lecturesGrade || 0;
+
+        // لو الحساب مفصول، نظهر تنبيه واضح ونستبدل خانة المجموع الإجمالي بصفر
         if (grades === EXPELLED_TEXT) {
           document.getElementById("studentGradesDisplay").textContent = "0";
+          document.getElementById("bibleGradeDisplay").textContent = "0";
+          document.getElementById("al7anGradeDisplay").textContent = "0";
+          document.getElementById("practicesGradeDisplay").textContent = "0";
+          document.getElementById("copticGradeDisplay").textContent = "0";
+          document.getElementById("lecturesGradeDisplay").textContent = "0";
           document.getElementById("expelledBanner").style.display = "block";
         } else {
           document.getElementById("studentGradesDisplay").textContent =

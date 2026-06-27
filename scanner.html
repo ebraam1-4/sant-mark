@@ -166,9 +166,8 @@
                     return;
                 }
 
-                // عداد الحضور: نزود رقم أيام الحضور بواحد كل مرة يسجل فيها حضوره لأول مرة في اليوم
+                // عداد الحضور: نعرض الترحيب لو مسجل حضور بالفعل اليوم، بدون تكرار العداد
                 if (studentData.status === "حاضر") {
-                    // الطالب سجل حضوره فعلاً اليوم، نعرض له الترحيب بس من غير ما نكرر العداد
                     document.getElementById('cardName').textContent = studentName;
                     document.getElementById('cardGroup').textContent = `مجموعة ${studentGroup}`;
                     welcomeCard.style.display = "block";
@@ -179,11 +178,13 @@
                     return;
                 }
 
-                const currentAttendance = parseInt(studentData.attendance) || 0;
+                // 🎯 التعديل هنا: قراءة العداد الجديد من خانة presence بدلاً من attendance
+                const currentPresence = parseInt(studentData.presence) || 0;
 
+                // 🎯 التعديل هنا: تحديث خانة presence لتتوافق مع الـ JSON الجديد
                 studentRef.update({
                     status: "حاضر",
-                    attendance: currentAttendance + 1
+                    presence: currentPresence + 1
                 }).then(() => {
                     // إظهار كارت الترحيب ببيانات الطفل
                     document.getElementById('cardName').textContent = studentName;

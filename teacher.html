@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم والكنترول - مدرسة مار مرقس</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-    <!-- مكتبة قراءة ملفات الإكسيل -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +26,12 @@
         .btn-reopen:hover { background: #218838; }
         .btn-new-day { background: #17a2b8; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3); }
         .btn-new-day:hover { background: #138496; }
+        
+        /* ألوان زرار التحكم في باب الحضور */
+        .btn-toggle-attendance { background: #ff0000; box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3); }
+        .btn-toggle-attendance:hover { background: #ee5a24; }
+        .btn-toggle-attendance.closed { background: #ea2027; box-shadow: 0 4px 15px rgba(234, 32, 39, 0.3); }
+
         .alert-msg { padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 1.5rem; display: none; text-align: center; }
         .alert-msg.success { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 0.5px solid #28a745; }
         .alert-msg.info { background: rgba(23, 162, 184, 0.2); color: #17a2b8; border: 0.5px solid #17a2b8; }
@@ -44,7 +49,6 @@
             </div>
         </div>
 
-        <!-- 🟢 قسم رفع ملف الإكسيل للسكانر الخارجي -->
         <div class="control-panel" style="border-color: #28a745;">
             <h2><i class="ti ti-file-spreadsheet"></i> رفع تقرير السكانر الخارجي (Excel)</h2>
             <p>اختر ملف إكسيل الحضور اليومي المستخرج من جهاز السكانر لتحديث غياب وحضور الطلاب تلقائياً بالاسم والمجموعة.</p>
@@ -56,7 +60,16 @@
             <div id="uploadAlert" class="alert-msg"></div>
         </div>
 
-        <!-- 🔵 قسم تصفير وبدء أسبوع جديد -->
+        <div class="control-panel" style="border-color: #ff0000;">
+            <h2><i class="ti ti-lock-open"></i> التحكم في باب الحضور</h2>
+            <p>يمكنك قفل استقبال الحضور والغياب لمنع الطلاب من التسجيل بعد انتهاء الوقت، أو فتحه مجدداً.</p>
+            
+            <button id="attendanceToggleBtn" class="btn-action btn-toggle-attendance" onclick="toggleAttendanceStatus()">
+                <i class="ti ti-refresh"></i> جاري فحص حالة الحضور...
+            </button>
+            <div id="statusAlert" class="alert-msg"></div>
+        </div>
+
         <div class="control-panel" style="border-color: rgba(23, 162, 184, 0.3);">
             <h2><i class="ti ti-calendar-plus"></i> بداية اجتماع جديد</h2>
             <p>⚠️ اضغط هنا <b>مرة واحدة فقط صباح يوم الخدمة الجديد الأسبوع القادم</b> لتصفير حالات حضور الطلاب المسبقة.</p>
@@ -73,10 +86,42 @@
     <script src="auth.js"></script>
 
     <script>
+        let currentAttendanceOpenStatus = true;
+
         if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('role') !== 'teacher') {
             window.location.href = "login.html";
         } else {
             document.getElementById('teacherName').textContent = sessionStorage.getItem('teacherName');
+        }
+
+        // مراقبة حالة الحضور فوراً من الفايربيس وتحديث شكل الزرار
+        database.ref('system_status/attendance_open').on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                currentAttendanceOpenStatus = snapshot.val();
+                const btn = document.getElementById('attendanceToggleBtn');
+                if (currentAttendanceOpenStatus) {
+                    btn.innerHTML = `<i class="ti ti-lock"></i> اقفل باب الحضور الآن (مفتوح حالياً)`;
+                    btn.classList.remove('closed');
+                } else {
+                    btn.innerHTML = `<i class="ti ti-lock-open"></i> افتح باب الحضور الآن (مغلق حالياً)`;
+                    btn.classList.add('closed');
+                }
+            }
+        });
+
+        // دالة تغيير حالة الحضور (قفل / فتح)
+        function toggleAttendanceStatus() {
+            const nextStatus = !currentAttendanceOpenStatus;
+            const statusAlert = document.getElementById('statusAlert');
+            
+            database.ref('system_status').update({
+                attendance_open: nextStatus
+            }).then(() => {
+                statusAlert.className = "alert-msg " + (nextStatus ? "success" : "warning");
+                statusAlert.textContent = nextStatus ? "🟢 تم فتح باب استقبال الحضور بنجاح!" : "🔴 تم قفل باب استقبال الحضور بنجاح!";
+                statusAlert.style.display = "block";
+                setTimeout(() => { statusAlert.style.display = "none"; }, 3000);
+            });
         }
 
         // دالة قراءة الإكسيل الذكية والمقارنة بالاسم والمجموعة
@@ -112,7 +157,6 @@
 
                                 if (studentData.status === "مفصول") return;
 
-                                // مقارنة ذكية بالاسم والمجموعة معاً لمنع التشابه
                                 const isPresent = excelRows.some(row => 
                                     String(row['الاسم']).trim() === studentName.trim() && 
                                     String(row['المجموعة']).trim() === groupName.trim()
@@ -130,7 +174,7 @@
 
                                     if (newAbsences >= 6) {
                                         updates[`/groups/${groupName}/${studentName}/status`] = "مفصول";
-                                        updates[`/groups/${groupName}/${studentName}/grades/total`] = 0;
+                                        updates[`/groups/${groupName}/${studentName}/grades`] = "❌ الحساب معطل (مفصول)";
                                     }
                                 }
                             });
@@ -147,7 +191,7 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // دالة تصفير الحالات للأسبوع الجديد
+        // دالة تصفير الحالات للأسبوع الجديد ويفتح الباب تلقائياً للاجتماع الجديد
         function startNewMeetingDay() {
             if (!confirm("⚠️ هل أنت متأكد من بدء أسبوع جديد؟ هذا سيصفر حالات الحضور اليومية للكل.")) return;
             const alertBox = document.getElementById('alertBox');
@@ -167,9 +211,13 @@
                             });
                         }
                     });
+
+                    // تصفير وفتح باب استقبال الحضور تلقائياً للأسبوع الجديد
+                    updates[`/system_status/attendance_open`] = true;
+
                     database.ref().update(updates).then(() => {
                         alertBox.className = "alert-msg warning";
-                        alertBox.textContent = "🔄 تم تصفير وتهيئة السيستم بنجاح لاستقبال يوم جديد!";
+                        alertBox.textContent = "🔄 تم تصفير وتهيئة السيستم بنجاح، وفتح باب استقبال الحضور للأسبوع الجديد!";
                         alertBox.style.display = "block";
                     });
                 }

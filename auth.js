@@ -26,7 +26,7 @@ function checkLogin() {
     return;
   }
 
-  /* ─── خادم ─── */
+  /* ─── خادم (المدرسين) ─── */
   if (groupInp === "teachers") {
     if (passInp === "") {
       errorTxt.textContent = "برجاء كتابة الباسورد الخاص بالمعلم!";
@@ -60,9 +60,29 @@ function checkLogin() {
         sessionStorage.setItem("role", "student");
         sessionStorage.setItem("studentName", userInp);
         sessionStorage.setItem("studentGroup", groupInp);
-        sessionStorage.setItem("studentGrades",     userData.grades     !== undefined ? userData.grades     : "");
-        sessionStorage.setItem("studentAttendance", userData.attendance !== undefined ? userData.attendance : 0);
-        sessionStorage.setItem("studentAbsence",    userData.absence    !== undefined ? userData.absence    : 0);
+        
+        // ربط عدادات الحضور والغياب الجديدة
+        sessionStorage.setItem("studentAttendance", userData.presence !== undefined ? userData.presence : 0);
+        sessionStorage.setItem("studentAbsence",    userData.absence  !== undefined ? userData.absence  : 0);
+        
+        // 🎯 إضافة المواد التفصيلية الجديدة جوه الـ sessionStorage بناءً على طلبك
+        if (userData.grades !== undefined) {
+          sessionStorage.setItem("studentGrades",         userData.grades.total       !== undefined ? userData.grades.total : 0);
+          sessionStorage.setItem("studentBibleGrade",     userData.grades.bible_sheet !== undefined ? userData.grades.bible_sheet : 0);
+          sessionStorage.setItem("studentAl7anGrade",     userData.grades.al7an       !== undefined ? userData.grades.al7an : 0);
+          sessionStorage.setItem("studentPracticesGrade", userData.grades.practices   !== undefined ? userData.grades.practices : 0);
+          sessionStorage.setItem("studentCopticGrade",    userData.grades.coptic      !== undefined ? userData.grades.coptic : 0);
+          sessionStorage.setItem("studentLecturesGrade",  userData.grades.lectures    !== undefined ? userData.grades.lectures : 0);
+        } else {
+          // تصفير احتياطي لو البيانات لسه مفيهاش درجات
+          sessionStorage.setItem("studentGrades", 0);
+          sessionStorage.setItem("studentBibleGrade", 0);
+          sessionStorage.setItem("studentAl7anGrade", 0);
+          sessionStorage.setItem("studentPracticesGrade", 0);
+          sessionStorage.setItem("studentCopticGrade", 0);
+          sessionStorage.setItem("studentLecturesGrade", 0);
+        }
+
         window.location.href = "index.html";
       } else {
         errorTxt.textContent = "هذا الاسم غير موجود في هذه المجموعة!";
