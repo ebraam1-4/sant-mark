@@ -33,6 +33,7 @@ function checkLogin() {
       errorTxt.style.display = "block";
       return;
     }
+    
     database.ref("teachers/" + userInp).once("value").then((snapshot) => {
       if (snapshot.exists()) {
         const teacherData = snapshot.val();
@@ -49,23 +50,27 @@ function checkLogin() {
         errorTxt.textContent = "هذا الاسم غير مسجل في هيئة التدريس!";
         errorTxt.style.display = "block";
       }
-    }).catch((err) => console.error("خطأ في جلب بيانات المعلم:", err));
+    }).catch((err) => {
+      console.error("خطأ في جلب بيانات المعلم:", err);
+    });
 
-  /* ─── تلميذ ─── */
+  /* ─── تلميذ (بناءً على الشجرة الحالية) ─── */
   } else {
+    // بندخل جوه groups ثم اسم المجموعة ثم اسم الطالب مباشرة
     database.ref("groups/" + groupInp + "/" + userInp).once("value").then((snapshot) => {
       if (snapshot.exists()) {
         const userData = snapshot.val();
+        
         sessionStorage.setItem("isLoggedIn", "true");
         sessionStorage.setItem("role", "student");
         sessionStorage.setItem("studentName", userInp);
         sessionStorage.setItem("studentGroup", groupInp);
         
-        // ربط عدادات الحضور والغياب الجديدة
+        // قراءة العدادات من جوه فرع الطالب مباشرة
         sessionStorage.setItem("studentAttendance", userData.presence !== undefined ? userData.presence : 0);
         sessionStorage.setItem("studentAbsence",    userData.absence  !== undefined ? userData.absence  : 0);
         
-        // 🎯 إضافة المواد التفصيلية الجديدة جوه الـ sessionStorage بناءً على طلبك
+        // قراءة الدرجات من تفاصيل الـ grades اللي جوه الطالب
         if (userData.grades !== undefined) {
           sessionStorage.setItem("studentGrades",         userData.grades.total       !== undefined ? userData.grades.total : 0);
           sessionStorage.setItem("studentBibleGrade",     userData.grades.bible_sheet !== undefined ? userData.grades.bible_sheet : 0);
@@ -74,7 +79,7 @@ function checkLogin() {
           sessionStorage.setItem("studentCopticGrade",    userData.grades.coptic      !== undefined ? userData.grades.coptic : 0);
           sessionStorage.setItem("studentLecturesGrade",  userData.grades.lectures    !== undefined ? userData.grades.lectures : 0);
         } else {
-          // تصفير احتياطي لو البيانات لسه مفيهاش درجات
+          // تصفير احتياطي لو مفيش درجات متسجلة
           sessionStorage.setItem("studentGrades", 0);
           sessionStorage.setItem("studentBibleGrade", 0);
           sessionStorage.setItem("studentAl7anGrade", 0);
@@ -88,6 +93,8 @@ function checkLogin() {
         errorTxt.textContent = "هذا الاسم غير موجود في هذه المجموعة!";
         errorTxt.style.display = "block";
       }
-    }).catch((err) => console.error("خطأ في جلب بيانات الطالب:", err));
+    }).catch((err) => {
+      console.error("خطأ في جلب بيانات الطالب:", err);
+    });
   }
 }
