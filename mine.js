@@ -60,7 +60,7 @@ function initRipple() {
   });
 }
 
-/* ── Tilt على الكروت (ديسكتوب فقط) ── */
+/* ── Tilt على الكروت (ديسكتوب فقط) 
 function initTilt() {
   if (window.innerWidth < 768) return;
   document.querySelectorAll(".subject-card, .info-card").forEach((card) => {
@@ -78,7 +78,7 @@ function initTilt() {
       this.style.transition = "transform 0.1s ease";
     });
   });
-}
+}── */
 
 /* ── Typing Effect على الـ Subtitle ── */
 function initTypingSubtitle() {

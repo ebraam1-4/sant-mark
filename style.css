@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;900&display=swap");
-
+ @font-face{font-family:"bero";
+     src: url(Rakkas-Regular.ttf);
+    }
 /* ════════════════════════════════════════════════════════════════════════════
    ✨ مدرسة مار مرقس - ورقة الأنماط الموحدة
    ════════════════════════════════════════════════════════════════════════════ */
@@ -114,7 +116,7 @@ header {
   width: 100%;
   background-color: var(--nav-bg);
   border-radius: 40px;
-  border-color:;
+  border-color:rgba(255, 255, 255, 0);
 }
 
 .nav-tab {
@@ -1517,9 +1519,3 @@ header {
 .player-progress:hover .player-progress-fill::after {
   opacity: 1;
 }
-
-
-
-
-
-
