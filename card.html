@@ -236,6 +236,99 @@
         border-color: #d4af37;
         color: #fff;
       }
+
+      /* ─── صندوق الاقتراحات والشكاوى ─── */
+      .suggestion-card {
+        margin-top: 2rem;
+      }
+
+      .suggestion-desc {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 13px;
+        margin-bottom: 1.5rem;
+      }
+
+      .sugg-field-wrap {
+        margin-bottom: 1rem;
+        text-align: right;
+      }
+
+      .sugg-field-label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .sugg-field-input {
+        width: 100%;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 0.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        direction: rtl;
+        font-family: sans-serif;
+        transition:
+          border-color 0.25s,
+          background 0.25s,
+          box-shadow 0.25s;
+      }
+      .sugg-field-input::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+      }
+      .sugg-field-input:focus {
+        border-color: rgba(212, 175, 55, 0.75);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+      }
+      textarea.sugg-field-input {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .btn-suggestion-submit {
+        width: 100%;
+        padding: 11px;
+        background: #d4af37;
+        color: #11172a;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        margin-top: 0.5rem;
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          background 0.2s,
+          transform 0.15s,
+          box-shadow 0.2s;
+      }
+      .btn-suggestion-submit:hover {
+        background: #e8c84a;
+        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+        transform: translateY(-1px);
+      }
+      .btn-suggestion-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .suggestion-msg {
+        font-size: 13px;
+        display: none;
+        margin-top: 12px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -255,16 +348,21 @@
         </div>
       </header>
 
-      <nav class="main-nav">
+       <nav class="main-nav">
         <ul class="nav-tabs">
-          <li class="nav-tab"><a href="index.html">🏠 الرئيسية</a></li>
-          <li class="nav-tab"><a href="class.html">📖 محاضرات</a></li>
-          <li class="nav-tab"><a href="coptic.html">⛪ قبطي</a></li>
-          <li class="nav-tab"><a href="al7an.html">🎵 ألحان</a></li>
-          <li class="nav-tab"><a href="mars.html">🎨 ممارسات</a></li>
-          <li class="nav-tab"><a href="sleep.html">😴 صلاة المساء</a></li>
-          <li class="nav-tab active">
-            <a href="card.html">📊 درجاتي وغيابي</a>
+          <li class="nav-tab active"><a href="index.html"> الرئيسية</a></li>
+          <li class="nav-tab"><a href="class.html"> محاضرات</a></li>
+          <li class="nav-tab"><a href="coptic.html"> قبطي</a></li>
+          <li class="nav-tab"><a href="al7an.html"> ألحان</a></li>
+          <li class="nav-tab"><a href="mars.html"> ممارسات</a></li>
+          <li class="nav-tab"><a href="sleep.html"> صلاة المساء</a></li>
+          
+          <li class="nav-tab" id="teacherControlTab" style="display: none">
+            <a href="teacher.html">صفحة الخادم</a>
+          </li>
+
+          <li class="nav-tab" id="studentTab" style="display: none">
+            <a href="card.html">صفحة الطالب</a>
           </li>
         </ul>
       </nav>
@@ -336,6 +434,61 @@
           >
         </div>
       </div>
+
+      <!-- 💬 صندوق الاقتراحات والشكاوى -->
+      <div class="card-wrapper">
+        <div class="student-digital-card suggestion-card">
+          <div class="card-header-emblem">
+            <i class="ti ti-message-2"></i>
+          </div>
+
+          <div class="display-name" style="font-size: 20px">
+            صندوق الاقتراحات والشكاوى
+          </div>
+          <p class="suggestion-desc">
+            رأيك بيوصلنا من غير اسمك، اكتب اللي في بالك وإحنا هنسمعك
+          </p>
+
+          <div class="sugg-field-wrap">
+            <label class="sugg-field-label">
+              <i class="ti ti-tag"></i> نوع الرسالة
+            </label>
+            <select
+              class="sugg-field-input"
+              id="suggestionType"
+              style="color: #fff; background: rgba(255, 255, 255, 0.06)"
+            >
+              <option value="اقتراح" style="background: #11172a">
+                💡 اقتراح
+              </option>
+              <option value="شكوى" style="background: #11172a">
+                ⚠️ شكوى
+              </option>
+            </select>
+          </div>
+
+          <div class="sugg-field-wrap">
+            <label class="sugg-field-label">
+              <i class="ti ti-edit"></i> اكتب رسالتك هنا
+            </label>
+            <textarea
+              class="sugg-field-input"
+              id="suggestionText"
+              rows="4"
+              placeholder="اكتب اقتراحك أو شكواك بالتفصيل..."
+            ></textarea>
+          </div>
+
+          <button
+            class="btn-suggestion-submit"
+            id="suggestionSubmitBtn"
+            onclick="submitSuggestion()"
+          >
+            <i class="ti ti-send"></i> إرسال
+          </button>
+          <p class="suggestion-msg" id="suggestionMsg"></p>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -389,6 +542,74 @@
             grades !== null && grades !== undefined && grades !== "" ? grades : 0;
         }
       });
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyDcfiHqsjFIf6ECVfh_M9Lij0aDVVe8Ho8",
+        authDomain: "school-989d1.firebaseapp.com",
+        databaseURL: "https://school-989d1-default-rtdb.firebaseio.com",
+        projectId: "school-989d1",
+        storageBucket: "school-989d1.firebasestorage.app",
+        messagingSenderId: "217947078105",
+        appId: "1:217947078105:web:5abaec6b22344523fd2dc8",
+        measurementId: "G-R0TSR9VR3L",
+      };
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const suggestionsDb = firebase.database();
+
+      function submitSuggestion() {
+        const typeInp = document.getElementById("suggestionType").value;
+        const textInp = document.getElementById("suggestionText").value.trim();
+        const msgEl = document.getElementById("suggestionMsg");
+        const btn = document.getElementById("suggestionSubmitBtn");
+
+        msgEl.style.display = "none";
+
+        if (textInp === "") {
+          msgEl.textContent = "برجاء كتابة رسالتك الأول!";
+          msgEl.style.color = "#f09595";
+          msgEl.style.display = "block";
+          return;
+        }
+
+        const name = sessionStorage.getItem("studentName") || "غير معروف";
+        const group = sessionStorage.getItem("studentGroup") || "غير معروف";
+
+        btn.disabled = true;
+        btn.innerHTML = "جاري الإرسال...";
+
+        suggestionsDb
+          .ref("suggestions")
+          .push({
+            name: name,
+            group: group,
+            type: typeInp,
+            message: textInp,
+            date: new Date().toLocaleString("ar-EG"),
+            timestamp: Date.now(),
+          })
+          .then(() => {
+            msgEl.textContent = "تم إرسال رسالتك بنجاح، شكراً ليك! 🙏";
+            msgEl.style.color = "#34d399";
+            msgEl.style.display = "block";
+            document.getElementById("suggestionText").value = "";
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-send"></i> إرسال';
+          })
+          .catch((err) => {
+            msgEl.textContent = "حصل خطأ أثناء الإرسال: " + err.message;
+            msgEl.style.color = "#f09595";
+            msgEl.style.display = "block";
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ti ti-send"></i> إرسال';
+          });
+      }
     </script>
   </body>
 </html>

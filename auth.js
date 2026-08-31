@@ -50,7 +50,7 @@ function checkLogin() {
           sessionStorage.setItem("teacherName", userInp);
           window.location.href = "index.html";
         } else {
-          errorTxt.textContent = `الباسورد غلط! المدخل: (${inputPassword}) - المتخزن: (${dbPassword})`;
+          errorTxt.textContent = "الباسورد غلط! برجاء المحاولة تاني";
           errorTxt.style.display = "block";
         }
       } else {
