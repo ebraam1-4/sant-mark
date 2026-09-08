@@ -222,18 +222,22 @@ document.addEventListener("DOMContentLoaded", () => {
   updateRoleNavItem();
 });
 /* ─── 🎵 نظام التحكم الذكي في تشغيل الصوت ─── */
-document.addEventListener("play", function(e) {
-  // التأكد من أن الحدث القادم هو من عنصر صوت (audio أو video)
-  if (e.target && e.target.tagName === "AUDIO") {
-    // جلب كل عناصر الصوت الموجودة في الصفحة حالياً
-    const allAudios = document.querySelectorAll("audio");
-    
-    allAudios.forEach((audio) => {
-      // لو العنصر مش هو نفسه اللي لسه شغال حالاً
-      if (audio !== e.target) {
-        audio.pause();       // إيقاف مؤقت
-        audio.currentTime = 0; // إرجاعه للموثر البداية (اختياري)
-      }
-    });
-  }
-}, true); // استخدام true (Capturing phase) لضمان لقط الحدث فوراً حتى لو العناصر مضافة ديناميكياً
+document.addEventListener(
+  "play",
+  function (e) {
+    // التأكد من أن الحدث القادم هو من عنصر صوت (audio أو video)
+    if (e.target && e.target.tagName === "AUDIO") {
+      // جلب كل عناصر الصوت الموجودة في الصفحة حالياً
+      const allAudios = document.querySelectorAll("audio");
+
+      allAudios.forEach((audio) => {
+        // لو العنصر مش هو نفسه اللي لسه شغال حالاً
+        if (audio !== e.target) {
+          audio.pause(); // إيقاف مؤقت
+          audio.currentTime = 0; // إرجاعه للموثر البداية (اختياري)
+        }
+      });
+    }
+  },
+  true,
+); // استخدام true (Capturing phase) لضمان لقط الحدث فوراً حتى لو العناصر مضافة ديناميكياً
