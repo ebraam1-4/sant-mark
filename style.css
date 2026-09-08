@@ -486,6 +486,10 @@ header {
   border-bottom: 1px solid var(--card-border);
 }
 
+.psalm-quick-play {
+  display: none;
+}
+
 p.pledge-text {
   font-size: 18px;
   line-height: 60px;
@@ -1200,6 +1204,42 @@ p.pledge-text {
    15. التصميم المتجاوب للشاشات الصغيرة (Responsive Design)
    ──────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .psalm-card {
+    padding-top: 22px;
+  }
+
+  .psalm-quick-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.12);
+    color: var(--accent-color);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .psalm-quick-play:hover,
+  .psalm-quick-play:focus-visible,
+  .psalm-quick-play.is-playing {
+    background: var(--accent-color);
+    color: #031b24;
+    outline: none;
+  }
+
+  .psalm-quick-play:active {
+    transform: scale(0.96);
+  }
+
   header {
     display: flex;
     flex-direction: row !important;

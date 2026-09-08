@@ -32,6 +32,50 @@ function initScrollReveal() {
   targets.forEach((el) => observer.observe(el));
 }
 
+/* ── زر تشغيل سريع لبطاقات الصلاة على الموبايل ── */
+function initPsalmQuickPlay() {
+  document.querySelectorAll(".psalm-card").forEach((card) => {
+    const audio = card.querySelector("audio");
+    const heading = card.querySelector("h3");
+    if (!audio || !heading || card.querySelector(".psalm-quick-play")) return;
+
+    const button = document.createElement("button");
+    button.className = "psalm-quick-play";
+    button.type = "button";
+    button.setAttribute("aria-label", "تشغيل الصلاة");
+    button.innerHTML =
+      '<span aria-hidden="true">▶</span><span class="quick-play-label">تشغيل</span>';
+
+    const updateButton = () => {
+      const isPlaying = !audio.paused && !audio.ended;
+      button.classList.toggle("is-playing", isPlaying);
+      button.setAttribute(
+        "aria-label",
+        isPlaying ? "إيقاف الصلاة" : "تشغيل الصلاة",
+      );
+      button.querySelector("span").textContent = isPlaying ? "❚❚" : "▶";
+      button.querySelector(".quick-play-label").textContent = isPlaying
+        ? "إيقاف"
+        : "تشغيل";
+    };
+
+    button.addEventListener("click", () => {
+      if (audio.paused || audio.ended) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+      updateButton();
+    });
+
+    audio.addEventListener("play", updateButton);
+    audio.addEventListener("pause", updateButton);
+    audio.addEventListener("ended", updateButton);
+    card.insertBefore(button, heading);
+    updateButton();
+  });
+}
+
 /* ── Ripple Effect على الأزرار ── */
 function initRipple() {
   if (!document.querySelector("#ripple-style")) {
@@ -214,6 +258,7 @@ function updateRoleNavItem() {
 /* ── تشغيل كل الحاجات عند تحميل الصفحة ── */
 document.addEventListener("DOMContentLoaded", () => {
   initScrollReveal();
+  initPsalmQuickPlay();
   initRipple();
   initTilt();
   initTypingSubtitle();
