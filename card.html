@@ -28,7 +28,7 @@
 
       body {
         font-family: sans-serif;
-        background: #11172a;
+        background: #031b24;
         color: #fff;
         min-height: 100vh;
         display: flex;
@@ -348,7 +348,7 @@
         </div>
       </header>
 
-       <nav class="main-nav">
+      <nav class="main-nav">
         <ul class="nav-tabs">
           <li class="nav-tab active"><a href="index.html"> الرئيسية</a></li>
           <li class="nav-tab"><a href="class.html"> محاضرات</a></li>
@@ -356,7 +356,7 @@
           <li class="nav-tab"><a href="al7an.html"> ألحان</a></li>
           <li class="nav-tab"><a href="mars.html"> ممارسات</a></li>
           <li class="nav-tab"><a href="sleep.html"> صلاة المساء</a></li>
-          
+
           <li class="nav-tab" id="teacherControlTab" style="display: none">
             <a href="teacher.html">صفحة الخادم</a>
           </li>
@@ -379,7 +379,11 @@
           <div class="display-group" id="studentGroupDisplay">
             مجموعة التلميذ
           </div>
-          <div class="display-group" id="studentCodeDisplay" style="margin-top: -1.5rem; margin-bottom: 2rem;">
+          <div
+            class="display-group"
+            id="studentCodeDisplay"
+            style="margin-top: -1.5rem; margin-bottom: 2rem"
+          >
             كود التلميذ: -
           </div>
 
@@ -417,7 +421,9 @@
               <div class="stat-label">
                 <i class="ti ti-calendar-check"></i> أيام الحضور
               </div>
-              <div class="stat-value attendance" id="studentAttendanceDisplay">0</div>
+              <div class="stat-value attendance" id="studentAttendanceDisplay">
+                0
+              </div>
             </div>
 
             <div class="stat-box">
@@ -464,9 +470,7 @@
               <option value="اقتراح" style="background: #11172a">
                 💡 اقتراح
               </option>
-              <option value="شكوى" style="background: #11172a">
-                ⚠️ شكوى
-              </option>
+              <option value="شكوى" style="background: #11172a">⚠️ شكوى</option>
             </select>
           </div>
 
@@ -517,22 +521,30 @@
         if (name)
           document.getElementById("studentNameDisplay").textContent = name;
         if (group)
-          document.getElementById("studentGroupDisplay").textContent = `مجموعة ${group}`;
+          document.getElementById("studentGroupDisplay").textContent =
+            `مجموعة ${group}`;
         document.getElementById("studentCodeDisplay").textContent =
-          code !== null && code !== undefined && code !== "" ? `كود التلميذ: ${code}` : "كود التلميذ: -";
+          code !== null && code !== undefined && code !== ""
+            ? `كود التلميذ: ${code}`
+            : "كود التلميذ: -";
 
-        // حقن أيام الحضور والغياب 
+        // حقن أيام الحضور والغياب
         document.getElementById("studentAttendanceDisplay").textContent =
           attendance !== null && attendance !== undefined ? attendance : 0;
         document.getElementById("studentAbsenceDisplay").textContent =
           absence !== null && absence !== undefined ? absence : 0;
 
         // حقن الدرجات التفصيلية المضافة حديثاً
-        document.getElementById("bibleGradeDisplay").textContent = bibleGrade || 0;
-        document.getElementById("al7anGradeDisplay").textContent = al7anGrade || 0;
-        document.getElementById("practicesGradeDisplay").textContent = practicesGrade || 0;
-        document.getElementById("copticGradeDisplay").textContent = copticGrade || 0;
-        document.getElementById("lecturesGradeDisplay").textContent = lecturesGrade || 0;
+        document.getElementById("bibleGradeDisplay").textContent =
+          bibleGrade || 0;
+        document.getElementById("al7anGradeDisplay").textContent =
+          al7anGrade || 0;
+        document.getElementById("practicesGradeDisplay").textContent =
+          practicesGrade || 0;
+        document.getElementById("copticGradeDisplay").textContent =
+          copticGrade || 0;
+        document.getElementById("lecturesGradeDisplay").textContent =
+          lecturesGrade || 0;
 
         // لو الحساب مفصول، نظهر تنبيه واضح ونستبدل خانة المجموع الإجمالي بصفر
         if (grades === EXPELLED_TEXT) {
@@ -545,7 +557,9 @@
           document.getElementById("expelledBanner").style.display = "block";
         } else {
           document.getElementById("studentGradesDisplay").textContent =
-            grades !== null && grades !== undefined && grades !== "" ? grades : 0;
+            grades !== null && grades !== undefined && grades !== ""
+              ? grades
+              : 0;
         }
       });
     </script>
