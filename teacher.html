@@ -1,105 +1,283 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>بيانات التلاميذ - مدرسة مار مرقس</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+    />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; min-height: 100vh; background: #11172a; color: #fff; padding: 2rem; }
-        .container { max-width: 900px; margin: 0 auto; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: sans-serif;
+        min-height: 100vh;
+        background: #11172a;
+        color: #fff;
+        padding: 2rem;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
 
-        .header-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; flex-wrap: wrap; }
-        .welcome-txt { font-size: 18px; font-weight: bold; }
-        .welcome-txt span { color: #d4af37; }
-        .group-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: rgba(212,175,55,0.12); border: 0.5px solid rgba(212,175,55,0.4); color: #d4af37; font-size: 13px; font-weight: bold; }
-        .header-buttons { display: flex; gap: 8px; }
-        .btn-logout, .btn-logout a { text-decoration: none; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; }
-        .btn-home { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2); }
-        .btn-home a { color: #fff; }
+      .header-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 0.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .welcome-txt {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .welcome-txt span {
+        color: #d4af37;
+      }
+      .group-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 0.5px solid rgba(212, 175, 55, 0.4);
+        color: #d4af37;
+        font-size: 13px;
+        font-weight: bold;
+      }
+      .header-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-logout,
+      .btn-logout a {
+        text-decoration: none;
+        padding: 8px 16px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn-home {
+        background: rgba(255, 255, 255, 0.1);
+        border: 0.5px solid rgba(255, 255, 255, 0.2);
+      }
+      .btn-home a {
+        color: #fff;
+      }
 
-        /* أداة البحث */
-        .filters-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 12px; flex-wrap: wrap; }
-        .filters-box input {
-            flex: 1; min-width: 160px; padding: 10px 14px; background: rgba(255,255,255,0.06);
-            border: 0.5px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px;
-            outline: none; font-family: sans-serif; direction: rtl;
-        }
-        .filters-box input::placeholder { color: rgba(255,255,255,0.35); }
-        .filters-box input:focus { border-color: rgba(212,175,55,0.75); }
+      /* أداة البحث */
+      .filters-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 0.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .filters-box input {
+        flex: 1;
+        min-width: 160px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 0.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        font-family: sans-serif;
+        direction: rtl;
+      }
+      .filters-box input::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+      }
+      .filters-box input:focus {
+        border-color: rgba(212, 175, 55, 0.75);
+      }
 
-        /* كارت المجموعة */
-        .group-block { margin-bottom: 1.5rem; }
-        .group-title {
-            color: #d4af37; font-size: 16px; font-weight: bold; margin-bottom: 0.75rem;
-            padding-bottom: 6px; border-bottom: 0.5px solid rgba(212,175,55,0.25);
-            display: flex; align-items: center; gap: 8px;
-        }
-        .group-title .count { color: rgba(255,255,255,0.45); font-size: 13px; font-weight: normal; }
+      /* كارت المجموعة */
+      .group-block {
+        margin-bottom: 1.5rem;
+      }
+      .group-title {
+        color: #d4af37;
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 0.75rem;
+        padding-bottom: 6px;
+        border-bottom: 0.5px solid rgba(212, 175, 55, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .group-title .count {
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 13px;
+        font-weight: normal;
+      }
 
+      .student-row {
+        background: rgba(255, 255, 255, 0.04);
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.7rem;
+        display: grid;
+        grid-template-columns: 1.3fr 1.1fr 0.7fr 0.7fr 1.1fr 0.6fr;
+        gap: 10px;
+        align-items: end;
+        transition:
+          background 0.2s,
+          border-color 0.2s;
+      }
+      .student-row:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(212, 175, 55, 0.3);
+      }
+
+      .field-label {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .field-value {
+        font-size: 14px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .student-name .field-value {
+        font-size: 15px;
+        color: #d4af37;
+      }
+      .field-value.attendance {
+        color: #34d399;
+      }
+      .field-value.absence {
+        color: #f87171;
+      }
+
+      .field-input {
+        width: 100%;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 0.5px solid rgba(255, 255, 255, 0.15);
+        border-radius: 6px;
+        color: #fff;
+        font-size: 13px;
+        outline: none;
+        font-family: sans-serif;
+        direction: rtl;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .field-input::placeholder {
+        color: rgba(255, 255, 255, 0.25);
+      }
+      .field-input:focus {
+        border-color: rgba(212, 175, 55, 0.75);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .field-input.dirty {
+        border-color: #d4af37;
+      }
+
+      .btn-save-row {
+        padding: 8px 10px;
+        background: #d4af37;
+        color: #11172a;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition:
+          background 0.2s,
+          opacity 0.2s;
+        white-space: nowrap;
+      }
+      .btn-save-row:hover {
+        background: #e8c84a;
+      }
+      .btn-save-row.saved {
+        background: #28a745;
+        color: #fff;
+      }
+      .btn-save-row:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      .empty-msg {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 2rem;
+        font-size: 14px;
+      }
+
+      @media (max-width: 700px) {
         .student-row {
-            background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1);
-            border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 0.7rem;
-            display: grid; grid-template-columns: 1.3fr 1.1fr 0.7fr 0.7fr 1.1fr 0.6fr; gap: 10px; align-items: end;
-            transition: background 0.2s, border-color 0.2s;
+          grid-template-columns: 1fr 1fr;
         }
-        .student-row:hover { background: rgba(255,255,255,0.07); border-color: rgba(212,175,55,0.3); }
-
-        .field-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
-        .field-value { font-size: 14px; font-weight: bold; color: #fff; }
-        .student-name .field-value { font-size: 15px; color: #d4af37; }
-        .field-value.attendance { color: #34d399; }
-        .field-value.absence { color: #f87171; }
-
-        .field-input {
-            width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.06);
-            border: 0.5px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;
-            font-size: 13px; outline: none; font-family: sans-serif; direction: rtl;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        .field-input::placeholder { color: rgba(255,255,255,0.25); }
-        .field-input:focus { border-color: rgba(212,175,55,0.75); background: rgba(255,255,255,0.1); }
-        .field-input.dirty { border-color: #d4af37; }
-
-        .btn-save-row {
-            padding: 8px 10px; background: #d4af37; color: #11172a; border: none;
-            border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 4px;
-            transition: background 0.2s, opacity 0.2s; white-space: nowrap;
-        }
-        .btn-save-row:hover { background: #e8c84a; }
-        .btn-save-row.saved { background: #28a745; color: #fff; }
-        .btn-save-row:disabled { opacity: 0.5; cursor: default; }
-
-        .empty-msg { text-align: center; color: rgba(255,255,255,0.4); padding: 2rem; font-size: 14px; }
-
-        @media (max-width: 700px) {
-            .student-row { grid-template-columns: 1fr 1fr; }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container">
-        <div class="header-box">
-            <div>
-                <div class="welcome-txt">بيانات التلاميذ: أ/ <span id="teacherName">..</span></div>
-                <div class="group-badge"><i class="ti ti-users"></i> <span id="teacherGroupName">..</span></div>
-            </div>
-            <div class="header-buttons">
-                <button class="btn-logout btn-home"><a href="index.html">الرئيسية</a></button>
-                <button class="btn-logout" onclick="logout()">خروج</button>
-            </div>
+      <div class="header-box">
+        <div>
+          <div class="welcome-txt">
+            بيانات التلاميذ: أ/ <span id="teacherName">..</span>
+          </div>
+          <div class="group-badge">
+            <i class="ti ti-users"></i> <span id="teacherGroupName">..</span>
+          </div>
         </div>
+        <div class="header-buttons">
+          <button class="btn-logout btn-home">
+            <a href="index.html">الرئيسية</a>
+          </button>
+          <button class="btn-logout" onclick="logout()">خروج</button>
+        </div>
+      </div>
 
-        <div class="filters-box">
-            <input type="text" id="searchInput" placeholder="🔍 دور باسم التلميذ...">
-        </div>
+      <div class="filters-box">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="🔍 دور باسم التلميذ..."
+        />
+      </div>
 
-        <div id="studentsContainer">
-            <div class="empty-msg">⏳ جاري تحميل بيانات التلاميذ...</div>
-        </div>
+      <div id="studentsContainer">
+        <div class="empty-msg">⏳ جاري تحميل بيانات التلاميذ...</div>
+      </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -107,84 +285,96 @@
     <script src="auth.js"></script>
 
     <script>
-        const teacherName  = sessionStorage.getItem('teacherName');
-        const teacherGroup = sessionStorage.getItem('teacherGroup');
+      const teacherName = sessionStorage.getItem("teacherName");
+      const teacherGroup = sessionStorage.getItem("teacherGroup");
 
-        const isTeacher = sessionStorage.getItem('isLoggedIn') === 'true'
-                       && sessionStorage.getItem('role') === 'teacher';
+      const isTeacher =
+        sessionStorage.getItem("isLoggedIn") === "true" &&
+        sessionStorage.getItem("role") === "teacher";
 
-        if (!isTeacher) {
-            window.location.href = "login.html";
-        } else if (!teacherGroup) {
-            // خادم داخل بجلسة قديمة من غير مجموعة: نطلّعه ويسجل دخول من جديد ويختار مجموعته
-            sessionStorage.clear();
-            window.location.href = "login.html";
-        } else {
-            document.getElementById('teacherName').textContent = teacherName;
-            document.getElementById('teacherGroupName').textContent = teacherGroup;
-            loadGroupStudents();
-        }
+      if (!isTeacher) {
+        window.location.href = "login.html";
+      } else if (!teacherGroup) {
+        // خادم داخل بجلسة قديمة من غير مجموعة: نطلّعه ويسجل دخول من جديد ويختار مجموعته
+        sessionStorage.clear();
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("teacherName").textContent = teacherName;
+        document.getElementById("teacherGroupName").textContent = teacherGroup;
+        loadGroupStudents();
+      }
 
-        // تلاميذ مجموعة الخادم بس
-        let groupStudents = {};
+      // تلاميذ مجموعة الخادم بس
+      let groupStudents = {};
 
-        function escapeHtml(value) {
-            return String(value === undefined || value === null ? '' : value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
+      function escapeHtml(value) {
+        return String(value === undefined || value === null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
 
-        function loadGroupStudents() {
-            const container = document.getElementById('studentsContainer');
+      function loadGroupStudents() {
+        const container = document.getElementById("studentsContainer");
 
-            // بنقرا فرع مجموعة الخادم بس، مش كل المجموعات
-            database.ref('groups/' + teacherGroup).once('value').then((snapshot) => {
-                if (!snapshot.exists()) {
-                    container.innerHTML = '<div class="empty-msg">لا يوجد تلاميذ في مجموعة (' + escapeHtml(teacherGroup) + ') حالياً</div>';
-                    return;
-                }
-                groupStudents = snapshot.val() || {};
-                renderStudents();
-            }).catch((err) => {
-                container.innerHTML = '<div class="empty-msg">خطأ في تحميل البيانات: ' + escapeHtml(err.message) + '</div>';
-            });
-        }
-
-        function renderStudents() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            const container = document.getElementById('studentsContainer');
-            container.innerHTML = '';
-
-            const allNames = Object.keys(groupStudents);
-            const matchingNames = allNames.filter((studentName) =>
-                !searchTerm || studentName.includes(searchTerm)
-            );
-
-            if (matchingNames.length === 0) {
-                container.innerHTML = '<div class="empty-msg">' +
-                    (allNames.length === 0
-                        ? 'لا يوجد تلاميذ في مجموعتك حالياً'
-                        : 'لا يوجد تلاميذ مطابقين لبحثك') +
-                    '</div>';
-                return;
+        // بنقرا فرع مجموعة الخادم بس، مش كل المجموعات
+        database
+          .ref("groups/" + teacherGroup)
+          .once("value")
+          .then((snapshot) => {
+            if (!snapshot.exists()) {
+              container.innerHTML =
+                '<div class="empty-msg">لا يوجد تلاميذ في مجموعة (' +
+                escapeHtml(teacherGroup) +
+                ") حالياً</div>";
+              return;
             }
+            groupStudents = snapshot.val() || {};
+            renderStudents();
+          })
+          .catch((err) => {
+            container.innerHTML =
+              '<div class="empty-msg">خطأ في تحميل البيانات: ' +
+              escapeHtml(err.message) +
+              "</div>";
+          });
+      }
 
-            const groupBlock = document.createElement('div');
-            groupBlock.className = 'group-block';
+      function renderStudents() {
+        const searchTerm = document.getElementById("searchInput").value.trim();
+        const container = document.getElementById("studentsContainer");
+        container.innerHTML = "";
 
-            const groupTitle = document.createElement('div');
-            groupTitle.className = 'group-title';
-            groupTitle.innerHTML = `<i class="ti ti-users"></i> ${escapeHtml(teacherGroup)} <span class="count">(${matchingNames.length})</span>`;
-            groupBlock.appendChild(groupTitle);
+        const allNames = Object.keys(groupStudents);
+        const matchingNames = allNames.filter(
+          (studentName) => !searchTerm || studentName.includes(searchTerm),
+        );
 
-            matchingNames.forEach((studentName) => {
-                const studentData = groupStudents[studentName] || {};
-                const row = document.createElement('div');
-                row.className = 'student-row';
-                row.innerHTML = `
+        if (matchingNames.length === 0) {
+          container.innerHTML =
+            '<div class="empty-msg">' +
+            (allNames.length === 0
+              ? "لا يوجد تلاميذ في مجموعتك حالياً"
+              : "لا يوجد تلاميذ مطابقين لبحثك") +
+            "</div>";
+          return;
+        }
+
+        const groupBlock = document.createElement("div");
+        groupBlock.className = "group-block";
+
+        const groupTitle = document.createElement("div");
+        groupTitle.className = "group-title";
+        groupTitle.innerHTML = `<i class="ti ti-users"></i> ${escapeHtml(teacherGroup)} <span class="count">(${matchingNames.length})</span>`;
+        groupBlock.appendChild(groupTitle);
+
+        matchingNames.forEach((studentName) => {
+          const studentData = groupStudents[studentName] || {};
+          const row = document.createElement("div");
+          row.className = "student-row";
+          row.innerHTML = `
                     <div class="student-name">
                         <div class="field-label"><i class="ti ti-user"></i> الاسم</div>
                         <div class="field-value">${escapeHtml(studentName)}</div>
@@ -200,70 +390,38 @@
                     <div>
                         <div class="field-label"><i class="ti ti-phone"></i> رقم التليفون</div>
                         <input class="field-input js-phone" type="tel"
-                            value="${escapeHtml(studentData.phone || '')}" placeholder="01xxxxxxxxx">
+                            value="${escapeHtml(studentData.phone || "")}" placeholder="01xxxxxxxxx">
                     </div>
                     <div>
                         <div class="field-label"><i class="ti ti-cake"></i> عيد الميلاد</div>
                         <input class="field-input js-birthday" type="date"
-                            value="${escapeHtml(studentData.birthday || '')}">
+                            value="${escapeHtml(studentData.birthday || "")}">
                     </div>
-                    <div>
-                        <button class="btn-save-row" type="button">
-                            <i class="ti ti-device-floppy"></i> حفظ
-                        </button>
                     </div>
                 `;
 
-                const phoneInput    = row.querySelector('.js-phone');
-                const birthdayInput = row.querySelector('.js-birthday');
-                const saveBtn       = row.querySelector('.btn-save-row');
+          const phoneInput = row.querySelector(".js-phone");
+          const birthdayInput = row.querySelector(".js-birthday");
+          const saveBtn = row.querySelector(".btn-save-row");
 
-                saveBtn.addEventListener('click', () => {
-                    saveStudentExtra(studentName, phoneInput, birthdayInput, saveBtn);
-                });
+          saveBtn.addEventListener("click", () => {
+            saveStudentExtra(studentName, phoneInput, birthdayInput, saveBtn);
+          });
 
-                groupBlock.appendChild(row);
-            });
+          groupBlock.appendChild(row);
+        });
 
-            container.appendChild(groupBlock);
-        }
+        container.appendChild(groupBlock);
+      }
 
-        document.getElementById('searchInput').addEventListener('input', renderStudents);
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", renderStudents);
 
-        // حفظ رقم التليفون وتاريخ الميلاد لتلميذ واحد (من مجموعة الخادم بس)
-        function saveStudentExtra(studentName, phoneInput, birthdayInput, btnEl) {
-            const phoneVal = phoneInput.value.trim();
-            const birthdayVal = birthdayInput.value.trim();
-
-            btnEl.disabled = true;
-            const originalHtml = btnEl.innerHTML;
-            btnEl.innerHTML = '<i class="ti ti-loader-2"></i> جاري الحفظ...';
-
-            database.ref('groups/' + teacherGroup + '/' + studentName).update({
-                phone: phoneVal,
-                birthday: birthdayVal
-            }).then(() => {
-                // تحديث النسخة المحلية عشان البحث يفضل متزامن
-                if (groupStudents[studentName]) {
-                    groupStudents[studentName].phone = phoneVal;
-                    groupStudents[studentName].birthday = birthdayVal;
-                }
-                btnEl.classList.add('saved');
-                btnEl.innerHTML = '<i class="ti ti-check"></i> تم الحفظ';
-                setTimeout(() => {
-                    btnEl.classList.remove('saved');
-                    btnEl.innerHTML = originalHtml;
-                    btnEl.disabled = false;
-                }, 1800);
-            }).catch((err) => {
-                btnEl.innerHTML = '<i class="ti ti-x"></i> فشل الحفظ';
-                alert('حصل خطأ أثناء الحفظ: ' + err.message);
-                btnEl.disabled = false;
-                setTimeout(() => { btnEl.innerHTML = originalHtml; }, 1800);
-            });
-        }
-
-        function logout() { sessionStorage.clear(); window.location.href = "login.html"; }
+      function logout() {
+        sessionStorage.clear();
+        window.location.href = "login.html";
+      }
     </script>
-</body>
+  </body>
 </html>
