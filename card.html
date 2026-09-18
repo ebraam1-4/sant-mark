@@ -379,6 +379,9 @@
           <div class="display-group" id="studentGroupDisplay">
             مجموعة التلميذ
           </div>
+          <div class="display-group" id="studentCodeDisplay" style="margin-top: -1.5rem; margin-bottom: 2rem;">
+            كود التلميذ: -
+          </div>
 
           <!-- 🏆 الجدول المطور الجديد لعرض تفاصيل الدرجات بالتفصيل -->
           <div class="grades-detailed-panel">
@@ -496,6 +499,7 @@
         // قراءة البيانات المحفوظة للتلميذ فور تسجيل دخوله بنجاح من الـ SessionStorage
         const name = sessionStorage.getItem("studentName");
         const group = sessionStorage.getItem("studentGroup");
+        const code = sessionStorage.getItem("studentCode");
         const grades = sessionStorage.getItem("studentGrades");
         const attendance = sessionStorage.getItem("studentAttendance");
         const absence = sessionStorage.getItem("studentAbsence");
@@ -514,6 +518,8 @@
           document.getElementById("studentNameDisplay").textContent = name;
         if (group)
           document.getElementById("studentGroupDisplay").textContent = `مجموعة ${group}`;
+        document.getElementById("studentCodeDisplay").textContent =
+          code !== null && code !== undefined && code !== "" ? `كود التلميذ: ${code}` : "كود التلميذ: -";
 
         // حقن أيام الحضور والغياب 
         document.getElementById("studentAttendanceDisplay").textContent =

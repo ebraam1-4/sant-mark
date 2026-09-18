@@ -1,0 +1,367 @@
+<!-- 🤖 بداية مكوّن المساعد الذكي العايم لمدرسة مارمرقس + Firebase + نظام الرتب -->
+<div id="orthodox-bot-widget" style="direction: rtl;">
+  <!-- كورة الروبوت العايمة -->
+  <button id="bot-floating-btn" aria-label="مساعد مارمرقس الذكي">
+    <div class="bot-icon">🤖</div>
+    <div class="pulse-ring"></div>
+  </button>
+
+  <!-- شاشة الشات الصغيرة (المنبثقة) -->
+  <div id="bot-chat-window-container" class="bot-hidden">
+    <header class="bot-header">
+      <div class="bot-avatar-lamp">✨</div>
+      <div class="bot-header-text">
+        <h3 id="botGreetingName">صديقك الأمين</h3>
+        <!-- بار النقاط والرتبة للشباب -->
+        <div class="bot-rank-container">
+          <span id="botRankBadge" class="bot-badge">جاري التحميل...</span>
+          <div class="bot-progress-bar-bg">
+            <div id="botProgressBar" class="bot-progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <span id="botPointsScore" class="bot-score-text">0 PTS</span>
+        </div>
+      </div>
+      <div class="bot-header-actions">
+        <button id="bot-maximize-btn" title="تكبير الشاشة" aria-label="تكبير">⛶</button>
+        <button id="bot-close-window-btn" title="إغلاق" aria-label="إغلاق">✕</button>
+      </div>
+    </header>
+
+    <div class="bot-chat-window" id="botChatWindow"></div>
+
+    <!-- 🎧 مشغل الصوتيات الداخلي الذكي -->
+    <div class="bot-audio-dock" id="botAudioDock">
+      <div class="bot-dock-note">🎵</div>
+      <div class="bot-dock-info">
+        <p class="bot-dock-title" id="botDockTitle">—</p>
+        <div class="bot-dock-progress-wrap">
+          <span class="bot-dock-time" id="botDockCurrent">0:00</span>
+          <input type="range" id="botDockSeek" class="bot-seek" min="0" max="100" value="0" />
+          <span class="bot-dock-time" id="botDockDuration">0:00</span>
+        </div>
+      </div>
+      <button class="bot-dock-btn bot-play-btn" id="botDockPlayBtn">⏸</button>
+      <button class="bot-dock-btn bot-close-btn" id="botDockCloseBtn">✕</button>
+      <audio id="botAudioPlayer" preload="none"></audio>
+    </div>
+
+    <div class="bot-suggestions" id="botSuggestions">
+      <button class="bot-tag-btn" data-q="مين هو مار مرقس؟">✝️ مين مار مرقس؟</button>
+      <button class="bot-tag-btn" data-q="الأسرار الكنسية كام؟">💧 الأسرار كام؟</button>
+      <button class="bot-tag-btn bot-audio-tag" data-q="شغللي مزامير النوم">🎧 شغل مزامير النوم</button>
+    </div>
+
+    <div class="bot-input-bar">
+      <input type="text" id="botUserInput" placeholder="اكتب سؤالك أو قولي 'شغل'..." autocomplete="off" />
+      <button id="botSendBtn">➤</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* استايلات المساعد الذكي مع الـ Gamification للشباب */
+  #orthodox-bot-widget {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  #bot-floating-btn {
+    position: fixed; bottom: 25px; right: 25px; width: 65px; height: 65px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f3dfa0, #d4af37 55%, #8a6b1a 100%);
+    border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.4);
+    cursor: pointer; z-index: 99999; display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #bot-floating-btn:hover { transform: scale(1.1); }
+  #bot-floating-btn .bot-icon { font-size: 30px; z-index: 2; }
+  #bot-floating-btn .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; background: rgba(212, 175, 55, 0.4); animation: botPulse 2s infinite; z-index: 1; }
+  @keyframes botPulse { 0% { transform: scale(0.95); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 0; } }
+
+  #bot-chat-window-container {
+    position: fixed; bottom: 100px; right: 25px; width: 390px; height: 565px; max-height: 80vh; max-width: 90vw;
+    background: linear-gradient(180deg, #12182d 0%, #0a0e1c 100%); border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; z-index: 99999;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 1; transform: translateY(0);
+  }
+  #bot-chat-window-container.bot-maximized { width: 780px; height: 82vh; max-width: 95vw; bottom: 25px; right: 25px; }
+  #bot-chat-window-container.bot-hidden { opacity: 0; pointer-events: none; transform: translateY(40px) scale(0.9); }
+
+  .bot-header { padding: 12px 16px; background: rgba(212, 175, 55, 0.08); border-bottom: 1px solid rgba(212, 175, 55, 0.15); display: flex; align-items: center; gap: 10px; }
+  .bot-avatar-lamp { font-size: 24px; }
+  .bot-header-text { flex: 1; min-width: 0; }
+  .bot-header-text h3 { margin: 0 0 4px; font-size: 14.5px; color: #f3dfa0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  
+  /* ستايل نظام الرتب لايف */
+  .bot-rank-container { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .bot-badge { font-size: 10px; background: #d4af37; color: #0a0e1c; padding: 1px 6px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
+  .bot-progress-bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+  .bot-progress-bar-fill { height: 100%; background: linear-gradient(90deg, #d4af37, #f3dfa0); transition: width 0.5s ease; }
+  .bot-score-text { font-size: 10px; color: rgba(246,239,221,0.6); font-weight: bold; min-width: 35px; text-align: left; }
+
+  .bot-header-actions { display: flex; align-items: center; gap: 12px; }
+  .bot-header-actions button { background: none; border: none; color: #fff; font-size: 15px; cursor: pointer; padding: 4px; opacity: 0.75; transition: opacity 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; }
+  .bot-header-actions button:hover { opacity: 1; transform: scale(1.1); }
+
+  .bot-chat-window { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+  .bot-chat-window::-webkit-scrollbar { width: 4px; }
+  .bot-chat-window::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+
+  .bot-row { display: flex; gap: 8px; max-width: 85%; animation: botIn 0.3s ease both; }
+  @keyframes botIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .bot-row.bot { align-self: flex-start; }
+  .bot-row.user { align-self: flex-end; flex-direction: row-reverse; }
+  .bot-bubble { padding: 10px 14px; font-size: 13.5px; line-height: 1.6; border-radius: 14px; word-wrap: break-word; }
+  .bot-row.bot .bot-bubble { background: #1a223f; color: #f6efdd; border: 1px solid rgba(212,175,55,0.12); border-top-right-radius: 2px; }
+  .bot-row.user .bot-bubble { background: #253362; color: #fff; border-top-left-radius: 2px; }
+
+  .bot-flame-dot { width: 6px; height: 6px; background: #e8c568; border-radius: 50%; display: inline-block; animation: botBob 1s infinite ease-in-out; }
+  .bot-flame-dot:nth-child(2) { animation-delay: 0.15s; }
+  .bot-flame-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes botBob { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  .bot-suggestions { padding: 5px 10px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .bot-suggestions::-webkit-scrollbar { display: none; }
+  .bot-tag-btn { flex-shrink: 0; font-size: 11.5px; color: #f3dfa0; background: rgba(212,175,55,0.06); border: 1px solid rgba(212,175,55,0.25); padding: 5px 10px; border-radius: 999px; cursor: pointer; font-family: inherit; }
+  .bot-tag-btn:hover { background: rgba(212,175,55,0.15); }
+
+  .bot-audio-dock { margin: 5px 10px; padding: 8px 12px; background: rgba(15,21,43,0.98); border: 1px solid #d4af37; border-radius: 12px; display: flex; align-items: center; gap: 10px; max-height: 0; overflow: hidden; opacity: 0; transition: all 0.3s ease; }
+  .bot-audio-dock.show { max-height: 80px; opacity: 1; margin-bottom: 5px; }
+  .bot-dock-note { font-size: 16px; animation: botSpin 4s linear infinite; }
+  @keyframes botSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .bot-dock-info { flex: 1; min-width: 0; }
+  .bot-dock-title { margin: 0 0 3px; font-size: 11.5px; color: #f3dfa0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bot-dock-progress-wrap { display: flex; align-items: center; gap: 6px; }
+  .bot-dock-time { font-size: 9.5px; color: rgba(246,239,221,0.6); }
+  .bot-seek { flex: 1; height: 3px; cursor: pointer; -webkit-appearance: none; appearance: none; background: rgba(246,239,221,0.2); }
+  .bot-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #f3dfa0; }
+  .bot-dock-btn { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .bot-play-btn { background: #d4af37; color: #0a0e1c; }
+  .bot-close-btn { background: rgba(255,255,255,0.1); color: #fff; }
+
+  .bot-input-bar { padding: 10px; border-top: 1px solid rgba(212,175,55,0.12); display: flex; gap: 8px; }
+  #botUserInput { flex: 1; background: #12182d; border: 1px solid rgba(212,175,55,0.2); border-radius: 999px; padding: 8px 14px; color: #f6efdd; font-family: inherit; font-size: 13px; outline: none; }
+  #botUserInput:focus { border-color: #e8c568; }
+  #botSendBtn { width: 36px; height: 36px; border-radius: 50%; border: none; background: #d4af37; color: #0a0e1c; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+</style>
+
+<!-- استدعاء مكاتب Firebase SDK (نسخة تضمن التوافق مع السكربتات المباشرة) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+(function() {
+  // 1. إعدادات الفايربيز (Firebase Config)
+  // ارجوك يا هندسة استبدل البيانات دي ببيانات مشروعك الحقيقي
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // المبادرة المانعة للتكرار
+  let app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  let currentUser = null;
+  let userPoints = 0;
+
+  // 2. إدارة فتح وقفل الشات والتكبير
+  const floatBtn = document.getElementById('bot-floating-btn');
+  const chatContainer = document.getElementById('bot-chat-window-container');
+  const closeBtn = document.getElementById('bot-close-window-btn');
+  const maxBtn = document.getElementById('bot-maximize-btn');
+
+  floatBtn.addEventListener('click', () => { chatContainer.classList.toggle('bot-hidden'); scrollToBottom(); });
+  closeBtn.addEventListener('click', () => { chatContainer.classList.add('bot-hidden'); });
+  maxBtn.addEventListener('click', () => {
+    chatContainer.classList.toggle('bot-maximized');
+    maxBtn.textContent = chatContainer.classList.contains('bot-maximized') ? '🗗' : '⛶';
+    scrollToBottom();
+  });
+
+  // 3. نظام الرتب والنقاط لايف للشباب
+  function updateRankUI(points) {
+    const badge = document.getElementById('botRankBadge');
+    const bar = document.getElementById('botProgressBar');
+    const scoreText = document.getElementById('botPointsScore');
+    
+    scoreText.textContent = `${points} PTS`;
+    
+    let rankName = "باحث مبتدئ 🔍";
+    let pct = (points / 20) * 100;
+    
+    if (points > 20 && points <= 50) {
+      rankName = "قارئ مطلع 📚";
+      pct = ((points - 20) / 30) * 100;
+    } else if (points > 50 && points <= 100) {
+      rankName = "غيور في المعرفة 🕊️";
+      pct = ((points - 50) / 50) * 100;
+    } else if (points > 100) {
+      rankName = "مدافع لاهوتي 🛡️✨";
+      pct = 100;
+    }
+    
+    badge.textContent = rankName;
+    bar.style.width = `${Math.min(pct, 100)}%`;
+  }
+
+  // إضافة نقاط للمستخدم وحفظها في Firestore
+  function addPoints(amount) {
+    userPoints += amount;
+    updateRankUI(userPoints);
+    if(currentUser) {
+      db.collection("users").doc(currentUser.uid).set({
+        points: userPoints
+      }, { merge: true }).catch(e => console.log("Error sync points:", e));
+    }
+  }
+
+  // 4. مراقبة حالة تسجيل الدخول في Firebase
+  auth.onAuthStateChanged((user) => {
+    const greetingName = document.getElementById('botGreetingName');
+    if (user) {
+      currentUser = user;
+      // نأخذ الاسم المسجل، وإذا لم يوجد نأخذ أول جزء من الإيميل
+      const name = user.displayName ? user.displayName : user.email.split('@')[0];
+      greetingName.textContent = `أهلاً، م/ ${name}`;
+      
+      // سحب النقاط الحالية من الفايرستور
+      db.collection("users").doc(user.uid).get().then((doc) => {
+        if (doc.exists && doc.data().points !== undefined) {
+          userPoints = doc.data().points;
+        } else {
+          userPoints = 0; // مستخدم جديد
+        }
+        updateRankUI(userPoints);
+      }).catch(() => {
+        userPoints = 0;
+        updateRankUI(userPoints);
+      });
+    } else {
+      currentUser = null;
+      userPoints = 0;
+      greetingName.textContent = "صديقك الأمين";
+      updateRankUI(0);
+    }
+  });
+
+  // 5. محرك الذكاء الاصطناعي ومعالجة الرسائل
+  let topicsKB = [
+    { keywords: ["مرقس", "مارمرقس", "كاروز", "اسد"], answer: "مارمرقس الرسول هو ناظر الإله كاروز الديار المصرية، وهو كاتب أول إنجيل وبنرمز له بالأسد الفخور! 🦁✨" },
+    { keywords: ["اسرار", "الاسرار", "سبعة", "المعمودية"], answer: "أسرار الكنيسة السبعة هي وسائط حية لنوال النعم غير المنظورة، وتأسست بكلمة الفادي نفسه. 💧🌾" },
+    { keywords: ["صوم", "بنصوم", "فائدة"], answer: "الصوم في المفهوم الكنسي هو حركة حب وارتفاع بالروح فوق متطلبات الجسد، لتهيئة النفس للصلاة العميقة. 🕊️" }
+  ];
+
+  let audioCommandsKB = [
+    { title: "مزامير النوم", file: "audio/psalms_sleep.mp3", triggerKeywords: ["مزامير النوم", "النوم", "الغروب"], replyText: "حاضر يا هندسة، هفتحلك مزمور النوم حالاً للراحة والتأمل الذكي! 🎧" }
+  ];
+
+  fetch('knowledge.json').then(res => res.json()).then(data => {
+    if(data.topics) topicsKB = data.topics;
+    if(data.audioCommands) audioCommandsKB = data.audioCommands;
+  }).catch(e => console.log("Working with direct database setup."));
+
+  function normalizeArabic(text) {
+    return text.toLowerCase().replace(/[\u064B-\u0652]/g, "")
+      .replace(/[إأآا]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه")
+      .replace(/[؟?!.,،]/g, "").trim();
+  }
+
+  const chatWindow = document.getElementById('botChatWindow');
+  const userInput = document.getElementById('botUserInput');
+  const sendBtn = document.getElementById('botSendBtn');
+  const suggestions = document.getElementById('botSuggestions');
+
+  function scrollToBottom() { chatWindow.scrollTop = chatWindow.scrollHeight; }
+
+  function addMsg(text, sender) {
+    const row = document.createElement('div'); row.className = `bot-row ${sender}`;
+    const bubble = document.createElement('div'); bubble.className = 'bot-bubble';
+    bubble.textContent = text; row.appendChild(bubble); chatWindow.appendChild(row);
+    scrollToBottom();
+  }
+
+  function handleMessage(text) {
+    if(!text.trim()) return;
+    addMsg(text, 'user');
+    userInput.value = '';
+
+    const typing = document.createElement('div'); typing.className = 'bot-row bot';
+    typing.innerHTML = '<div class="bot-bubble"><span class="bot-flame-dot"></span> <span class="bot-flame-dot"></span> <span class="bot-flame-dot"></span></div>';
+    chatWindow.appendChild(typing); scrollToBottom();
+
+    setTimeout(() => {
+      typing.remove();
+      const normalized = normalizeArabic(text);
+      
+      const commandWords = ["شغل", "شغلي", "اسمع", "سمعني", "play"];
+      const hasCmd = commandWords.some(w => normalized.includes(w));
+      
+      let matchedAudio = null;
+      if(hasCmd) {
+        matchedAudio = audioCommandsKB.find(track => track.triggerKeywords.some(kw => normalized.includes(normalizeArabic(kw))));
+      }
+
+      if(matchedAudio) {
+        addMsg(matchedAudio.replyText, 'bot');
+        playAudio(matchedAudio.file, matchedAudio.title);
+        addPoints(5); // مكافأة الاستماع لقراءات لاهوتية أو صلوات
+      } else {
+        const match = topicsKB.find(t => t.keywords.some(kw => normalized.includes(normalizeArabic(kw))));
+        if(match) {
+          addMsg(match.answer, 'bot');
+          addPoints(2); // مكافأة البحث وسؤال البوت المعرفي
+        } else {
+          addMsg("سؤال لاهوتي/تاريخي عميق جداً! 🌟 هسجله عندي عشان أبحث في المراجع وأجاوبك عليه بدقة في التحديث الجاي. تقدر تناقشه مع خادم أسرتك حالياً! 😊", 'bot');
+        }
+      }
+    }, 800);
+  }
+
+  // 6. مشغل الصوت الداخلي
+  const audioDock = document.getElementById('botAudioDock');
+  const player = document.getElementById('botAudioPlayer');
+  const dockTitle = document.getElementById('botDockTitle');
+  const playBtn = document.getElementById('botDockPlayBtn');
+  const closeDockBtn = document.getElementById('botDockCloseBtn');
+  const seek = document.getElementById('botDockSeek');
+  const currentT = document.getElementById('botDockCurrent');
+  const durationT = document.getElementById('botDockDuration');
+
+  function playAudio(file, title) {
+    if(player.src !== file) player.src = file;
+    dockTitle.textContent = title; audioDock.classList.add('show');
+    player.play().catch(e => console.log("Interaction needed"));
+    playBtn.textContent = '⏸';
+  }
+
+  playBtn.addEventListener('click', () => {
+    if(player.paused) { player.play(); playBtn.textContent = '⏸'; }
+    else { player.pause(); playBtn.textContent = '▶'; }
+  });
+  closeDockBtn.addEventListener('click', () => { player.pause(); audioDock.classList.remove('show'); });
+  player.addEventListener('loadedmetadata', () => { seek.max = Math.floor(player.duration); durationT.textContent = formatTime(player.duration); });
+  player.addEventListener('timeupdate', () => { seek.value = Math.floor(player.currentTime); currentT.textContent = formatTime(player.currentTime); });
+  seek.addEventListener('input', () => player.currentTime = seek.value);
+  
+  function formatTime(secs) {
+    const m = Math.floor(secs / 60); const s = Math.floor(secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  sendBtn.addEventListener('click', () => handleMessage(userInput.value));
+  userInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleMessage(userInput.value); });
+  suggestions.addEventListener('click', (e) => { if(e.target.classList.contains('bot-tag-btn')) handleMessage(e.target.dataset.q); });
+
+  // ترحيب أولي ذكي
+  setTimeout(() => {
+    const name = currentUser ? (currentUser.displayName ? currentUser.displayName : currentUser.email.split('@')[0]) : "يا بطل";
+    addMsg(`سلام ونعمة م/ ${name}! 👋 مرحب بيك في منصة المساعد الذكي لمدرسة مارمرقس. ابدأ اسألني أو اطلب تشغيل الألحان والصلوات لتجميع النقاط وترقية رتبتك المعرفية! 🛡️✨`, 'bot');
+  }, 1200);
+})();
+</script>
+<!-- 🤖 نهاية مكوّن المساعد الذكي -->

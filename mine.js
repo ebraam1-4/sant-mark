@@ -172,37 +172,6 @@ function initNavSparkles() {
   });
 }
 
-/* ── تبديل الوضع الداكن / الفاتح ── */
-function initThemeSwitcher() {
-  const switcher = document.querySelector("#theme-switcher");
-  if (!switcher) return;
-  const label = switcher.querySelector(".theme-switcher-label");
-  const icon = switcher.querySelector(".theme-switcher-icon");
-  const body = document.body;
-
-  body.classList.toggle(
-    "light-theme",
-    localStorage.getItem("mm-theme") === "light",
-  );
-
-  function updateSwitcher() {
-    const isLight = body.classList.contains("light-theme");
-    label.textContent = isLight ? "الوضع الفاتح" : "الوضع الداكن";
-    icon.textContent = isLight ? "☀️" : "🌙";
-    switcher.style.background = isLight
-      ? "rgba(15,23,30,0.1)"
-      : "rgba(255,255,255,0.08)";
-  }
-
-  switcher.addEventListener("click", () => {
-    const activeLight = !body.classList.contains("light-theme");
-    body.classList.toggle("light-theme", activeLight);
-    localStorage.setItem("mm-theme", activeLight ? "light" : "dark");
-    updateSwitcher();
-  });
-  updateSwitcher();
-}
-
 /* ── إضافة تبويب الـ Nav حسب الدور ── */
 function createNavTab(id, href, title) {
   const existing = document.getElementById(id);

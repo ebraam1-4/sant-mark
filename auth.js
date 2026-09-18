@@ -75,6 +75,7 @@ function checkLogin() {
         
         sessionStorage.setItem("studentAttendance", userData.presence !== undefined ? userData.presence : 0);
         sessionStorage.setItem("studentAbsence",    userData.absence  !== undefined ? userData.absence  : 0);
+        sessionStorage.setItem("studentCode",       userData.code     !== undefined ? userData.code     : "");
         
         if (userData.grades !== undefined) {
           sessionStorage.setItem("studentGrades",         userData.grades.total       !== undefined ? userData.grades.total : 0);
