@@ -204,13 +204,13 @@ function updateRoleNavItem() {
 
   if (role === "teacher") {
     if (studentTab) studentTab.style.display = "none";
-    const tab = createNavTab("teacherTab", "scanner.html", "📸 تسجيل الطلاب");
-    if (tab) tab.style.display = "";
+
     const controlTab = createNavTab(
       "teacherControlTab",
       "teacher.html",
-      "🔒 قفل الحضور",
+      "بيانات التلاميذ",
     );
+
     if (controlTab) controlTab.style.display = "";
   } else if (role === "student") {
     if (teacherTab) teacherTab.style.display = "none";
@@ -229,10 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollReveal();
   initPsalmQuickPlay();
   initRipple();
-  initTilt();
+  if (typeof initTilt === "function") initTilt();
   initTypingSubtitle();
   initNavSparkles();
-  initThemeSwitcher();
+  if (typeof initThemeSwitcher === "function") initThemeSwitcher();
   updateRoleNavItem();
 });
 /* ─── 🎵 نظام التحكم الذكي في تشغيل الصوت ─── */

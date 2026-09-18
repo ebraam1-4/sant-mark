@@ -84,15 +84,15 @@
         text-align: right;
       }
 
-      /* تأثير أنيميشن ناعم لاختفاء وظهور خانة الباسورد */
-      #passwordFieldWrap {
+      /* تأثير أنيميشن ناعم لاختفاء وظهور خانات الخادم (المجموعة + الباسورد) */
+      .teacher-only {
         transition: all 0.3s ease;
         max-height: 0;
         opacity: 0;
         overflow: hidden;
         margin-bottom: 0;
       }
-      #passwordFieldWrap.show {
+      .teacher-only.show {
         max-height: 100px;
         opacity: 1;
         margin-bottom: 1rem;
@@ -292,7 +292,20 @@
         />
       </div>
 
-      <div class="field-wrap" id="passwordFieldWrap">
+      <div class="field-wrap teacher-only" id="teacherGroupWrap">
+        <label class="field-label">
+          <i class="ti ti-school"></i> مجموعتك
+        </label>
+        <select
+          class="field-input"
+          id="teacherGroupSelect"
+          style="color: #fff; background: rgba(255, 255, 255, 0.06)"
+        >
+          <option value="" style="background: #11172a">اختر مجموعتك</option>
+        </select>
+      </div>
+
+      <div class="field-wrap teacher-only" id="passwordFieldWrap">
         <label class="field-label">
           <i class="ti ti-lock"></i> كلمة المرور
         </label>
@@ -327,18 +340,38 @@
         window.location.href = "index.html";
       }
 
-      // دالة سحرية لإخفاء وإظهار الباسورد على حسب الاختيار
+      // تعبئة قايمة "مجموعتك" للخادم من نفس مجموعات الصفحة (من غير ما نكرر الأسماء)
+      function fillTeacherGroups() {
+        const source = document.getElementById("groupSelect");
+        const target = document.getElementById("teacherGroupSelect");
+        Array.from(source.options).forEach((opt) => {
+          if (opt.value === "teachers") return;
+          const o = document.createElement("option");
+          o.value = opt.value;
+          o.textContent = opt.textContent.trim();
+          o.style.background = "#11172a";
+          target.appendChild(o);
+        });
+      }
+
+      // إظهار / إخفاء خانات الخادم (المجموعة + الباسورد) على حسب الاختيار
       function togglePasswordField() {
         const groupSelect = document.getElementById("groupSelect");
         const passwordFieldWrap = document.getElementById("passwordFieldWrap");
+        const teacherGroupWrap = document.getElementById("teacherGroupWrap");
 
         if (groupSelect.value === "teachers") {
-          passwordFieldWrap.classList.add("show"); // اظهر الباسورد لو خادم
+          passwordFieldWrap.classList.add("show");
+          teacherGroupWrap.classList.add("show");
         } else {
-          passwordFieldWrap.classList.remove("show"); // اخفي الباسورد لو طالب
-          document.getElementById("password").value = ""; // صفر الخانة
+          passwordFieldWrap.classList.remove("show");
+          teacherGroupWrap.classList.remove("show");
+          document.getElementById("password").value = "";
+          document.getElementById("teacherGroupSelect").value = "";
         }
       }
+
+      fillTeacherGroups();
 
       // تشغيل الدالة فوراً عند فتح الصفحة للتأكد من الحالة الابتدائية
       togglePasswordField();

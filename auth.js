@@ -14,6 +14,27 @@ if (!firebase.apps.length) {
 }
 const database = firebase.database();
 
+/* بترجّع قايمة المجموعات اللي الخادم مسموح له بيها */
+function getAllowedGroups(teacherData) {
+  const list = [];
+  const collect = (val) => {
+    if (val === undefined || val === null) return;
+    if (typeof val === "string") {
+      if (val.trim() !== "") list.push(val.trim());
+    } else if (Array.isArray(val)) {
+      val.forEach(collect);
+    } else if (typeof val === "object") {
+      Object.keys(val).forEach((k) => {
+        if (typeof val[k] === "string") list.push(val[k].trim()); // { "0": "اسم المجموعة" }
+        else if (val[k]) list.push(k.trim());                     // { "اسم المجموعة": true }
+      });
+    }
+  };
+  collect(teacherData.group);
+  collect(teacherData.groups);
+  return list;
+}
+
 function checkLogin() {
   const groupInp = document.getElementById("groupSelect").value.trim();
   const userInp  = document.getElementById("username").value.trim();
@@ -31,6 +52,15 @@ function checkLogin() {
 
   /* ─── خادم (المدرسين) ─── */
   if (groupInp === "teachers") {
+    const teacherGroupEl = document.getElementById("teacherGroupSelect");
+    const teacherGroup = teacherGroupEl ? teacherGroupEl.value.trim() : "";
+
+    if (teacherGroup === "") {
+      errorTxt.textContent = "برجاء اختيار مجموعتك!";
+      errorTxt.style.display = "block";
+      return;
+    }
+
     if (passInp === "") {
       errorTxt.textContent = "برجاء كتابة الباسورد الخاص بالمعلم!";
       errorTxt.style.display = "block";
@@ -40,19 +70,31 @@ function checkLogin() {
     database.ref("teachers/" + userInp).once("value").then((snapshot) => {
       if (snapshot.exists()) {
         const teacherData = snapshot.val();
-        
+
         const inputPassword = String(passInp).trim();
         const dbPassword = String(teacherData.password).trim();
 
-        if (inputPassword === dbPassword) {
-          sessionStorage.setItem("isLoggedIn", "true");
-          sessionStorage.setItem("role", "teacher");
-          sessionStorage.setItem("teacherName", userInp);
-          window.location.href = "index.html";
-        } else {
+        if (inputPassword !== dbPassword) {
           errorTxt.textContent = "الباسورد غلط! برجاء المحاولة تاني";
           errorTxt.style.display = "block";
+          return;
         }
+
+        /* المجموعات المسموح بيها للخادم ده (لو متسجلة في الفايربيز).
+           بيقبل: group: "اسم"  أو  groups: ["اسم1","اسم2"]  أو  groups: { "اسم1": true } */
+        const allowedGroups = getAllowedGroups(teacherData);
+
+        if (allowedGroups.length > 0 && allowedGroups.indexOf(teacherGroup) === -1) {
+          errorTxt.textContent = `حضرتك مش مسجل خادم في مجموعة (${teacherGroup})`;
+          errorTxt.style.display = "block";
+          return;
+        }
+
+        sessionStorage.setItem("isLoggedIn", "true");
+        sessionStorage.setItem("role", "teacher");
+        sessionStorage.setItem("teacherName", userInp);
+        sessionStorage.setItem("teacherGroup", teacherGroup);
+        window.location.href = "index.html";
       } else {
         errorTxt.textContent = `الاسم (${userInp}) مش موجود في فرع الخدام بالفايربيز. اتأكد من المسافات والهمزات!`;
         errorTxt.style.display = "block";

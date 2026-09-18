@@ -3,81 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم والكنترول - مدرسة مار مرقس</title>
+    <title>بيانات التلاميذ - مدرسة مار مرقس</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: sans-serif; min-height: 100vh; background: #11172a; color: #fff; padding: 2rem; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; }
+        .container { max-width: 900px; margin: 0 auto; }
+
+        .header-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; gap: 10px; flex-wrap: wrap; }
         .welcome-txt { font-size: 18px; font-weight: bold; }
         .welcome-txt span { color: #d4af37; }
+        .group-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: rgba(212,175,55,0.12); border: 0.5px solid rgba(212,175,55,0.4); color: #d4af37; font-size: 13px; font-weight: bold; }
         .header-buttons { display: flex; gap: 8px; }
         .btn-logout, .btn-logout a { text-decoration: none; padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; }
         .btn-home { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(255,255,255,0.2); }
         .btn-home a { color: #fff; }
-        .control-panel { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
-        .control-panel h2 { color: #d4af37; font-size: 20px; margin-bottom: 1rem; }
-        .control-panel p { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.6; }
-        .btn-action { width: 100%; padding: 14px; background: #dc3545; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); transition: 0.2s; margin-bottom: 1rem; }
-        .btn-action:hover { background: #bd2130; }
-        .btn-reopen { background: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
-        .btn-reopen:hover { background: #218838; }
-        .btn-new-day { background: #17a2b8; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3); }
-        .btn-new-day:hover { background: #138496; }
-        
-        /* ألوان زرار التحكم في باب الحضور */
-        .btn-toggle-attendance { background: #ff0000; box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3); }
-        .btn-toggle-attendance:hover { background: #ee5a24; }
-        .btn-toggle-attendance.closed { background: #ea2027; box-shadow: 0 4px 15px rgba(234, 32, 39, 0.3); }
 
-        .alert-msg { padding: 12px; border-radius: 6px; font-size: 14px; margin-top: 1.5rem; display: none; text-align: center; }
-        .alert-msg.success { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 0.5px solid #28a745; }
-        .alert-msg.info { background: rgba(23, 162, 184, 0.2); color: #17a2b8; border: 0.5px solid #17a2b8; }
-        .alert-msg.warning { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 0.5px solid #ffc107; }
+        /* أداة البحث */
+        .filters-box { background: rgba(255,255,255,0.05); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; gap: 12px; flex-wrap: wrap; }
+        .filters-box input {
+            flex: 1; min-width: 160px; padding: 10px 14px; background: rgba(255,255,255,0.06);
+            border: 0.5px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px;
+            outline: none; font-family: sans-serif; direction: rtl;
+        }
+        .filters-box input::placeholder { color: rgba(255,255,255,0.35); }
+        .filters-box input:focus { border-color: rgba(212,175,55,0.75); }
+
+        /* كارت المجموعة */
+        .group-block { margin-bottom: 1.5rem; }
+        .group-title {
+            color: #d4af37; font-size: 16px; font-weight: bold; margin-bottom: 0.75rem;
+            padding-bottom: 6px; border-bottom: 0.5px solid rgba(212,175,55,0.25);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .group-title .count { color: rgba(255,255,255,0.45); font-size: 13px; font-weight: normal; }
+
+        .student-row {
+            background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 0.7rem;
+            display: grid; grid-template-columns: 1.3fr 1.1fr 0.7fr 0.7fr 1.1fr 0.6fr; gap: 10px; align-items: end;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .student-row:hover { background: rgba(255,255,255,0.07); border-color: rgba(212,175,55,0.3); }
+
+        .field-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+        .field-value { font-size: 14px; font-weight: bold; color: #fff; }
+        .student-name .field-value { font-size: 15px; color: #d4af37; }
+        .field-value.attendance { color: #34d399; }
+        .field-value.absence { color: #f87171; }
+
+        .field-input {
+            width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.06);
+            border: 0.5px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff;
+            font-size: 13px; outline: none; font-family: sans-serif; direction: rtl;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .field-input::placeholder { color: rgba(255,255,255,0.25); }
+        .field-input:focus { border-color: rgba(212,175,55,0.75); background: rgba(255,255,255,0.1); }
+        .field-input.dirty { border-color: #d4af37; }
+
+        .btn-save-row {
+            padding: 8px 10px; background: #d4af37; color: #11172a; border: none;
+            border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            transition: background 0.2s, opacity 0.2s; white-space: nowrap;
+        }
+        .btn-save-row:hover { background: #e8c84a; }
+        .btn-save-row.saved { background: #28a745; color: #fff; }
+        .btn-save-row:disabled { opacity: 0.5; cursor: default; }
+
+        .empty-msg { text-align: center; color: rgba(255,255,255,0.4); padding: 2rem; font-size: 14px; }
+
+        @media (max-width: 700px) {
+            .student-row { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="header-box">
-            <div class="welcome-txt">غرفة الكنترول: أ/ <span id="teacherName">..</span></div>
+            <div>
+                <div class="welcome-txt">بيانات التلاميذ: أ/ <span id="teacherName">..</span></div>
+                <div class="group-badge"><i class="ti ti-users"></i> <span id="teacherGroupName">..</span></div>
+            </div>
             <div class="header-buttons">
                 <button class="btn-logout btn-home"><a href="index.html">الرئيسية</a></button>
                 <button class="btn-logout" onclick="logout()">خروج</button>
             </div>
         </div>
 
-        <div class="control-panel" style="border-color: #28a745;">
-            <h2><i class="ti ti-file-spreadsheet"></i> رفع تقرير السكانر الخارجي (Excel)</h2>
-            <p>اختر ملف إكسيل الحضور اليومي المستخرج من جهاز السكانر لتحديث غياب وحضور الطلاب تلقائياً بالاسم والمجموعة.</p>
-            
-            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
-            <button class="btn-action btn-reopen" onclick="document.getElementById('excelFile').click()">
-                <i class="ti ti-upload"></i> رفع ملف Excel وتحديث السيستم فوراً
-            </button>
-            <div id="uploadAlert" class="alert-msg"></div>
+        <div class="filters-box">
+            <input type="text" id="searchInput" placeholder="🔍 دور باسم التلميذ...">
         </div>
 
-        <div class="control-panel" style="border-color: #ff0000;">
-            <h2><i class="ti ti-lock-open"></i> التحكم في باب الحضور</h2>
-            <p>يمكنك قفل استقبال الحضور والغياب لمنع الطلاب من التسجيل بعد انتهاء الوقت، أو فتحه مجدداً.</p>
-            
-            <button id="attendanceToggleBtn" class="btn-action btn-toggle-attendance" onclick="toggleAttendanceStatus()">
-                <i class="ti ti-refresh"></i> جاري فحص حالة الحضور...
-            </button>
-            <div id="statusAlert" class="alert-msg"></div>
-        </div>
-
-        <div class="control-panel" style="border-color: rgba(23, 162, 184, 0.3);">
-            <h2><i class="ti ti-calendar-plus"></i> بداية اجتماع جديد</h2>
-            <p>⚠️ اضغط هنا <b>مرة واحدة فقط صباح يوم الخدمة الجديد الأسبوع القادم</b> لتصفير حالات حضور الطلاب المسبقة.</p>
-            
-            <button class="btn-action btn-new-day" onclick="startNewMeetingDay()">
-                <i class="ti ti-refresh"></i> تهيئة وتصفير الحالات لبدء يوم جديد
-            </button>
-            <div id="alertBox" class="alert-msg"></div>
+        <div id="studentsContainer">
+            <div class="empty-msg">⏳ جاري تحميل بيانات التلاميذ...</div>
         </div>
     </div>
 
@@ -86,141 +107,159 @@
     <script src="auth.js"></script>
 
     <script>
-        let currentAttendanceOpenStatus = true;
+        const teacherName  = sessionStorage.getItem('teacherName');
+        const teacherGroup = sessionStorage.getItem('teacherGroup');
 
-        if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('role') !== 'teacher') {
+        const isTeacher = sessionStorage.getItem('isLoggedIn') === 'true'
+                       && sessionStorage.getItem('role') === 'teacher';
+
+        if (!isTeacher) {
+            window.location.href = "login.html";
+        } else if (!teacherGroup) {
+            // خادم داخل بجلسة قديمة من غير مجموعة: نطلّعه ويسجل دخول من جديد ويختار مجموعته
+            sessionStorage.clear();
             window.location.href = "login.html";
         } else {
-            document.getElementById('teacherName').textContent = sessionStorage.getItem('teacherName');
+            document.getElementById('teacherName').textContent = teacherName;
+            document.getElementById('teacherGroupName').textContent = teacherGroup;
+            loadGroupStudents();
         }
 
-        // مراقبة حالة الحضور فوراً من الفايربيس وتحديث شكل الزرار
-        database.ref('system_status/attendance_open').on('value', (snapshot) => {
-            if (snapshot.exists()) {
-                currentAttendanceOpenStatus = snapshot.val();
-                const btn = document.getElementById('attendanceToggleBtn');
-                if (currentAttendanceOpenStatus) {
-                    btn.innerHTML = `<i class="ti ti-lock"></i> اقفل باب الحضور الآن (مفتوح حالياً)`;
-                    btn.classList.remove('closed');
-                } else {
-                    btn.innerHTML = `<i class="ti ti-lock-open"></i> افتح باب الحضور الآن (مغلق حالياً)`;
-                    btn.classList.add('closed');
-                }
-            }
-        });
+        // تلاميذ مجموعة الخادم بس
+        let groupStudents = {};
 
-        // دالة تغيير حالة الحضور (قفل / فتح)
-        function toggleAttendanceStatus() {
-            const nextStatus = !currentAttendanceOpenStatus;
-            const statusAlert = document.getElementById('statusAlert');
-            
-            database.ref('system_status').update({
-                attendance_open: nextStatus
-            }).then(() => {
-                statusAlert.className = "alert-msg " + (nextStatus ? "success" : "warning");
-                statusAlert.textContent = nextStatus ? "🟢 تم فتح باب استقبال الحضور بنجاح!" : "🔴 تم قفل باب استقبال الحضور بنجاح!";
-                statusAlert.style.display = "block";
-                setTimeout(() => { statusAlert.style.display = "none"; }, 3000);
+        function escapeHtml(value) {
+            return String(value === undefined || value === null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function loadGroupStudents() {
+            const container = document.getElementById('studentsContainer');
+
+            // بنقرا فرع مجموعة الخادم بس، مش كل المجموعات
+            database.ref('groups/' + teacherGroup).once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div class="empty-msg">لا يوجد تلاميذ في مجموعة (' + escapeHtml(teacherGroup) + ') حالياً</div>';
+                    return;
+                }
+                groupStudents = snapshot.val() || {};
+                renderStudents();
+            }).catch((err) => {
+                container.innerHTML = '<div class="empty-msg">خطأ في تحميل البيانات: ' + escapeHtml(err.message) + '</div>';
             });
         }
 
-        // دالة قراءة الإكسيل الذكية والمقارنة بالاسم والمجموعة
-        function handleExcelUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function renderStudents() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            const container = document.getElementById('studentsContainer');
+            container.innerHTML = '';
 
-            const alertBox = document.getElementById('uploadAlert');
-            alertBox.className = "alert-msg info";
-            alertBox.textContent = "⏳ جاري معالجة ملف الإكسيل وتحديث الفايربيس...";
-            alertBox.style.display = "block";
+            const allNames = Object.keys(groupStudents);
+            const matchingNames = allNames.filter((studentName) =>
+                !searchTerm || studentName.includes(searchTerm)
+            );
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const excelRows = XLSX.utils.sheet_to_json(worksheet);
+            if (matchingNames.length === 0) {
+                container.innerHTML = '<div class="empty-msg">' +
+                    (allNames.length === 0
+                        ? 'لا يوجد تلاميذ في مجموعتك حالياً'
+                        : 'لا يوجد تلاميذ مطابقين لبحثك') +
+                    '</div>';
+                return;
+            }
 
-                database.ref('groups').once('value').then((snapshot) => {
-                    if (!snapshot.exists()) return;
+            const groupBlock = document.createElement('div');
+            groupBlock.className = 'group-block';
 
-                    let updates = {};
-                    
-                    snapshot.forEach((groupSnapshot) => {
-                        const groupName = groupSnapshot.key;
-                        
-                        if (groupName !== "هيئة التدريس") {
-                            groupSnapshot.forEach((studentSnapshot) => {
-                                const studentName = studentSnapshot.key;
-                                const studentData = studentSnapshot.val();
+            const groupTitle = document.createElement('div');
+            groupTitle.className = 'group-title';
+            groupTitle.innerHTML = `<i class="ti ti-users"></i> ${escapeHtml(teacherGroup)} <span class="count">(${matchingNames.length})</span>`;
+            groupBlock.appendChild(groupTitle);
 
-                                if (studentData.status === "مفصول") return;
+            matchingNames.forEach((studentName) => {
+                const studentData = groupStudents[studentName] || {};
+                const row = document.createElement('div');
+                row.className = 'student-row';
+                row.innerHTML = `
+                    <div class="student-name">
+                        <div class="field-label"><i class="ti ti-user"></i> الاسم</div>
+                        <div class="field-value">${escapeHtml(studentName)}</div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="ti ti-calendar-check"></i> الحضور</div>
+                        <div class="field-value attendance">${escapeHtml(studentData.presence !== undefined ? studentData.presence : 0)}</div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="ti ti-calendar-x"></i> الغياب</div>
+                        <div class="field-value absence">${escapeHtml(studentData.absence !== undefined ? studentData.absence : 0)}</div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="ti ti-phone"></i> رقم التليفون</div>
+                        <input class="field-input js-phone" type="tel"
+                            value="${escapeHtml(studentData.phone || '')}" placeholder="01xxxxxxxxx">
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="ti ti-cake"></i> عيد الميلاد</div>
+                        <input class="field-input js-birthday" type="date"
+                            value="${escapeHtml(studentData.birthday || '')}">
+                    </div>
+                    <div>
+                        <button class="btn-save-row" type="button">
+                            <i class="ti ti-device-floppy"></i> حفظ
+                        </button>
+                    </div>
+                `;
 
-                                const isPresent = excelRows.some(row => 
-                                    String(row['الاسم']).trim() === studentName.trim() && 
-                                    String(row['المجموعة']).trim() === groupName.trim()
-                                );
+                const phoneInput    = row.querySelector('.js-phone');
+                const birthdayInput = row.querySelector('.js-birthday');
+                const saveBtn       = row.querySelector('.btn-save-row');
 
-                                if (isPresent) {
-                                    updates[`/groups/${groupName}/${studentName}/status`] = "حاضر";
-                                    let currentPresence = parseInt(studentData.presence) || 0;
-                                    updates[`/groups/${groupName}/${studentName}/presence`] = currentPresence + 1;
-                                } else {
-                                    let currentAbsences = parseInt(studentData.absence) || 0;
-                                    let newAbsences = currentAbsences + 1;
-                                    updates[`/groups/${groupName}/${studentName}/absence`] = newAbsences;
-                                    updates[`/groups/${groupName}/${studentName}/status`] = "غائب";
-
-                                    if (newAbsences >= 6) {
-                                        updates[`/groups/${groupName}/${studentName}/status`] = "مفصول";
-                                        updates[`/groups/${groupName}/${studentName}/grades`] = "❌ الحساب معطل (مفصول)";
-                                    }
-                                }
-                            });
-                        }
-                    });
-
-                    database.ref().update(updates).then(() => {
-                        alertBox.className = "alert-msg success";
-                        alertBox.textContent = "📊 تم بنجاح! تحديث غياب وحضور جميع الطلاب بناءً على تقرير السكانر.";
-                        event.target.value = ''; 
-                    });
+                saveBtn.addEventListener('click', () => {
+                    saveStudentExtra(studentName, phoneInput, birthdayInput, saveBtn);
                 });
-            };
-            reader.readAsArrayBuffer(file);
+
+                groupBlock.appendChild(row);
+            });
+
+            container.appendChild(groupBlock);
         }
 
-        // دالة تصفير الحالات للأسبوع الجديد ويفتح الباب تلقائياً للاجتماع الجديد
-        function startNewMeetingDay() {
-            if (!confirm("⚠️ هل أنت متأكد من بدء أسبوع جديد؟ هذا سيصفر حالات الحضور اليومية للكل.")) return;
-            const alertBox = document.getElementById('alertBox');
-            
-            database.ref('groups').once('value').then((snapshot) => {
-                if (snapshot.exists()) {
-                    let updates = {};
-                    snapshot.forEach((groupSnapshot) => {
-                        const groupName = groupSnapshot.key;
-                        if (groupName !== "هيئة التدريس") {
-                            groupSnapshot.forEach((studentSnapshot) => {
-                                const studentName = studentSnapshot.key;
-                                const studentData = studentSnapshot.val();
-                                if (studentData.status !== "مفصول") {
-                                    updates[`/groups/${groupName}/${studentName}/status`] = ""; 
-                                }
-                            });
-                        }
-                    });
+        document.getElementById('searchInput').addEventListener('input', renderStudents);
 
-                    // تصفير وفتح باب استقبال الحضور تلقائياً للأسبوع الجديد
-                    updates[`/system_status/attendance_open`] = true;
+        // حفظ رقم التليفون وتاريخ الميلاد لتلميذ واحد (من مجموعة الخادم بس)
+        function saveStudentExtra(studentName, phoneInput, birthdayInput, btnEl) {
+            const phoneVal = phoneInput.value.trim();
+            const birthdayVal = birthdayInput.value.trim();
 
-                    database.ref().update(updates).then(() => {
-                        alertBox.className = "alert-msg warning";
-                        alertBox.textContent = "🔄 تم تصفير وتهيئة السيستم بنجاح، وفتح باب استقبال الحضور للأسبوع الجديد!";
-                        alertBox.style.display = "block";
-                    });
+            btnEl.disabled = true;
+            const originalHtml = btnEl.innerHTML;
+            btnEl.innerHTML = '<i class="ti ti-loader-2"></i> جاري الحفظ...';
+
+            database.ref('groups/' + teacherGroup + '/' + studentName).update({
+                phone: phoneVal,
+                birthday: birthdayVal
+            }).then(() => {
+                // تحديث النسخة المحلية عشان البحث يفضل متزامن
+                if (groupStudents[studentName]) {
+                    groupStudents[studentName].phone = phoneVal;
+                    groupStudents[studentName].birthday = birthdayVal;
                 }
+                btnEl.classList.add('saved');
+                btnEl.innerHTML = '<i class="ti ti-check"></i> تم الحفظ';
+                setTimeout(() => {
+                    btnEl.classList.remove('saved');
+                    btnEl.innerHTML = originalHtml;
+                    btnEl.disabled = false;
+                }, 1800);
+            }).catch((err) => {
+                btnEl.innerHTML = '<i class="ti ti-x"></i> فشل الحفظ';
+                alert('حصل خطأ أثناء الحفظ: ' + err.message);
+                btnEl.disabled = false;
+                setTimeout(() => { btnEl.innerHTML = originalHtml; }, 1800);
             });
         }
 
