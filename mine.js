@@ -215,7 +215,7 @@ function updateRoleNavItem() {
   } else if (role === "student") {
     if (teacherTab) teacherTab.style.display = "none";
     if (teacherControlTab) teacherControlTab.style.display = "none";
-    const tab = createNavTab("studentTab", "card.html", "📊 درجاتي وغيابي");
+    const tab = createNavTab("studentTab", "card.html", "صفحة التلميذ");
     if (tab) tab.style.display = "";
   } else {
     if (teacherTab) teacherTab.style.display = "none";
