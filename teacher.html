@@ -136,15 +136,18 @@
       }
 
       .student-row {
-        background: rgba(255, 255, 255, 0.04);
-        border: 0.5px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 0.75rem;
         margin-bottom: 0.7rem;
         display: grid;
-        grid-template-columns: 1.3fr 1.1fr 0.7fr 0.7fr 1.1fr 0.6fr;
-        gap: 10px;
-        align-items: end;
+        grid-template-columns: minmax(180px, 1.5fr) repeat(
+            4,
+            minmax(105px, 1fr)
+          );
+        gap: 8px;
+        align-items: stretch;
         transition:
           background 0.2s,
           border-color 0.2s;
@@ -155,17 +158,24 @@
       }
 
       .field-label {
-        font-size: 11px;
+        font-size: 10px;
         color: rgba(255, 255, 255, 0.4);
-        margin-bottom: 3px;
+        margin: 0 0 5px;
         display: flex;
         align-items: center;
         gap: 4px;
       }
+      .student-row > div {
+        min-width: 0;
+        padding: 9px 10px;
+        border-radius: 7px;
+        background: rgba(0, 0, 0, 0.12);
+      }
       .field-value {
-        font-size: 14px;
-        font-weight: bold;
-        color: #fff;
+        min-height: 20px;
+        overflow-wrap: anywhere;
+        font-size: 13px;
+        color: #34d39991;
       }
       .student-name .field-value {
         font-size: 15px;
@@ -178,62 +188,6 @@
         color: #f87171;
       }
 
-      .field-input {
-        width: 100%;
-        padding: 8px 10px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 0.5px solid rgba(255, 255, 255, 0.15);
-        border-radius: 6px;
-        color: #fff;
-        font-size: 13px;
-        outline: none;
-        font-family: sans-serif;
-        direction: rtl;
-        transition:
-          border-color 0.2s,
-          background 0.2s;
-      }
-      .field-input::placeholder {
-        color: rgba(255, 255, 255, 0.25);
-      }
-      .field-input:focus {
-        border-color: rgba(212, 175, 55, 0.75);
-        background: rgba(255, 255, 255, 0.1);
-      }
-      .field-input.dirty {
-        border-color: #d4af37;
-      }
-
-      .btn-save-row {
-        padding: 8px 10px;
-        background: #d4af37;
-        color: #11172a;
-        border: none;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        transition:
-          background 0.2s,
-          opacity 0.2s;
-        white-space: nowrap;
-      }
-      .btn-save-row:hover {
-        background: #e8c84a;
-      }
-      .btn-save-row.saved {
-        background: #28a745;
-        color: #fff;
-      }
-      .btn-save-row:disabled {
-        opacity: 0.5;
-        cursor: default;
-      }
-
       .empty-msg {
         text-align: center;
         color: rgba(255, 255, 255, 0.4);
@@ -244,6 +198,19 @@
       @media (max-width: 700px) {
         .student-row {
           grid-template-columns: 1fr 1fr;
+        }
+        .student-row > div:first-child {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (min-width: 701px) and (max-width: 900px) {
+        .student-row {
+          grid-template-columns: 1.4fr repeat(4, minmax(90px, 1fr));
+          padding: 0.6rem;
+        }
+        .student-row > div {
+          padding-inline: 7px;
         }
       }
     </style>
@@ -389,24 +356,13 @@
                     </div>
                     <div>
                         <div class="field-label"><i class="ti ti-phone"></i> رقم التليفون</div>
-                        <input class="field-input js-phone" type="tel"
-                            value="${escapeHtml(studentData.phone || "")}" placeholder="01xxxxxxxxx">
+                      <div class="field-value">${escapeHtml(studentData.phone ?? "")}</div>
                     </div>
                     <div>
                         <div class="field-label"><i class="ti ti-cake"></i> عيد الميلاد</div>
-                        <input class="field-input js-birthday" type="date"
-                            value="${escapeHtml(studentData.birthday || "")}">
-                    </div>
+                      <div class="field-value">${escapeHtml(studentData.birthday ?? "")}</div>
                     </div>
                 `;
-
-          const phoneInput = row.querySelector(".js-phone");
-          const birthdayInput = row.querySelector(".js-birthday");
-          const saveBtn = row.querySelector(".btn-save-row");
-
-          saveBtn.addEventListener("click", () => {
-            saveStudentExtra(studentName, phoneInput, birthdayInput, saveBtn);
-          });
 
           groupBlock.appendChild(row);
         });
