@@ -60,12 +60,12 @@
       }
       .header-buttons {
         display: flex;
-        gap: 8px;
+        gap: 12px;
       }
       .btn-logout,
-      .btn-logout a {
-        text-decoration: none;
-        padding: 8px 16px;
+      .btn-home {
+        margin: 10px;
+        padding: 10px 15px;
         background: #dc3545;
         color: white;
         border: none;
@@ -75,12 +75,12 @@
         display: inline-flex;
         align-items: center;
       }
-      .btn-home {
-        background: rgba(255, 255, 255, 0.1);
-        border: 0.5px solid rgba(255, 255, 255, 0.2);
-      }
+
+      .btn-logout a,
       .btn-home a {
-        color: #fff;
+        padding: 5px 15px;
+        color: white;
+        text-decoration: none;
       }
 
       /* أداة البحث */
@@ -175,7 +175,7 @@
         min-height: 20px;
         overflow-wrap: anywhere;
         font-size: 13px;
-        color: #34d39991;
+        color: #d4af37;
       }
       .student-name .field-value {
         font-size: 15px;
@@ -227,7 +227,7 @@
           </div>
         </div>
         <div class="header-buttons">
-          <button class="btn-logout btn-home">
+          <button class="btn-home">
             <a href="index.html">الرئيسية</a>
           </button>
           <button class="btn-logout" onclick="logout()">خروج</button>
