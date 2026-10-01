@@ -21,7 +21,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #031b24;
+        background: #11172a;
       }
 
       .login-card {
@@ -86,16 +86,14 @@
       }
 
       /* تأثير أنيميشن ناعم لاختفاء وظهور خانات الخادم (المجموعة + الباسورد) */
-      .teacher-only,
-      .student-only {
+      .teacher-only {
         transition: all 0.3s ease;
         max-height: 0;
         opacity: 0;
         overflow: hidden;
         margin-bottom: 0;
       }
-      .teacher-only.show,
-      .student-only.show {
+      .teacher-only.show {
         max-height: 100px;
         opacity: 1;
         margin-bottom: 1rem;
@@ -295,19 +293,6 @@
         />
       </div>
 
-      <div class="field-wrap student-only show" id="studentCodeWrap">
-        <label class="field-label">
-          <i class="ti ti-key"></i> كود التلميذ
-        </label>
-        <input
-          class="field-input"
-          type="text"
-          inputmode="numeric"
-          id="studentCode"
-          placeholder="اكتب الكود الموجود في البيانات"
-        />
-      </div>
-
       <div class="field-wrap teacher-only" id="teacherGroupWrap">
         <label class="field-label">
           <i class="ti ti-school"></i> مجموعتك
@@ -375,17 +360,13 @@
         const groupSelect = document.getElementById("groupSelect");
         const passwordFieldWrap = document.getElementById("passwordFieldWrap");
         const teacherGroupWrap = document.getElementById("teacherGroupWrap");
-        const studentCodeWrap = document.getElementById("studentCodeWrap");
 
         if (groupSelect.value === "teachers") {
           passwordFieldWrap.classList.add("show");
           teacherGroupWrap.classList.add("show");
-          studentCodeWrap.classList.remove("show");
-          document.getElementById("studentCode").value = "";
         } else {
           passwordFieldWrap.classList.remove("show");
           teacherGroupWrap.classList.remove("show");
-          studentCodeWrap.classList.add("show");
           document.getElementById("password").value = "";
           document.getElementById("teacherGroupSelect").value = "";
         }
